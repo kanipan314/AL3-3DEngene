@@ -4,16 +4,43 @@
 
 GameScene::GameScene() {}
 
-GameScene::~GameScene() {}
+//デストラクタ
+GameScene::~GameScene() {
+
+	delete model_;
+
+	//自キャラの解放
+	delete player_;
+
+}
 
 void GameScene::Initialize() {
 
 	dxCommon_ = DirectXCommon::GetInstance();
 	input_ = Input::GetInstance();
 	audio_ = Audio::GetInstance();
+
+	//ファイル名の指定
+	textureHandle_ = TextureManager::Load("/cube/cube.jpg");
+
+	//3dモデルの生成
+	model_ = Model::Create();
+
+	//カメラ系初期化
+	worldTransfrom_.Initialize();
+	viewProjection_.Initialize();
+
+	//自キャラの生成
+	player_ = new Player();
+
 }
 
-void GameScene::Update() {}
+void GameScene::Update() {
+
+	//自キャラの更新
+	player_->Update();
+
+}
 
 void GameScene::Draw() {
 
@@ -41,6 +68,9 @@ void GameScene::Draw() {
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
+
+	//自キャラの描画
+	player_->Draw();
 
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();

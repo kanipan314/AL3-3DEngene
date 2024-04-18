@@ -4,6 +4,7 @@
 #include "DirectXCommon.h"
 #include "Input.h"
 #include "Model.h"
+#include "Player.h"
 #include "Sprite.h"
 #include "ViewProjection.h"
 #include "WorldTransform.h"
@@ -39,10 +40,28 @@ public: // メンバ関数
 	/// </summary>
 	void Draw();
 
+	
+
+	
 private: // メンバ変数
 	DirectXCommon* dxCommon_ = nullptr;
 	Input* input_ = nullptr;
 	Audio* audio_ = nullptr;
+	Model* model_ = nullptr;
+
+	uint32_t textureHandle_ = 0;
+
+	// ワールドトランスフォーム
+	WorldTransform worldTransfrom_;
+	// ビュープロジェクション
+	ViewProjection viewProjection_;
+
+	/// <summary>
+	/// 自キャラ　
+	/// </summary>
+
+	Player* player_ = nullptr;
+	
 
 	/// <summary>
 	/// ゲームシーン用
