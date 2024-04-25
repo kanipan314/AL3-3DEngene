@@ -29,9 +29,9 @@ void GameScene::Initialize() {
 	//カメラ系初期化
 	worldTransfrom_.Initialize();
 	viewProjection_.Initialize();
-
 	//自キャラの生成
 	player_ = new Player();
+	player_->Initialize(model_,textureHandle_,&viewProjection_);
 
 }
 

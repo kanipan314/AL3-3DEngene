@@ -12,7 +12,7 @@ class Player {
 
 	public:
 		/// 初期化
-	    void Initialize(Model* model,uint32_t textureHandle);
+	    void Initialize(Model* model,uint32_t textureHandle,ViewProjection* viewProjection);
 
 	    /// 更新
 	    void Update();
@@ -23,10 +23,11 @@ class Player {
 	private:
 		///ワールド変換
 	    WorldTransform worldTransform_;
+		ViewProjection* viewProjection_ = nullptr;
 		///モデル
-	    Model* playermodel_ = nullptr;
+	    Model* model_ = nullptr;
 		///テクスチャハンドル
-	    uint32_t playertextureHandle = 0;
+	    uint32_t textureHandle_ = 0;
 
 
 };
