@@ -57,7 +57,7 @@ private: // メンバ変数
 	Audio* audio_ = nullptr;
 	Model* model_ = nullptr;
 	Model* Blockmodel_ = nullptr;
-	Model* Skydomemodel_ = nullptr;
+	Model* SkydomeModel_ = nullptr;
 
 	// でバックカメラ有効
 	bool isDebugCameraActive_ = false;
@@ -75,8 +75,8 @@ private: // メンバ変数
 
 	Player* player_ = nullptr;
 	
-	////天球
-	//skydome* skydome_ = nullptr;
+	//天球
+	Skydome* skydome_ = nullptr;
 
 	/// <summary>
 	/// ゲームシーン用

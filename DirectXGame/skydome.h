@@ -1,7 +1,6 @@
 #pragma once
 
 #include "WorldTransform.h"
-#include "GameScene.h"
 #include "TextureManager.h"
 #include "Model.h"
 #include "Sprite.h"
@@ -11,7 +10,7 @@
 /// <summary>
 /// 天球
 /// </summary>
-class skydome {
+class Skydome {
 
 	public:
 
@@ -19,7 +18,7 @@ class skydome {
 	/// 初期化
 	/// </summary>
 
-	void Initialize(ViewProjection* viewProjection);
+	void Initialize(Model* model,ViewProjection* viewProjection);
 
 	///更新
 	void Update();
@@ -32,6 +31,9 @@ class skydome {
 	    WorldTransform worldTransform_;
 	    ViewProjection* viewProjection_ = nullptr;
 		///モデル
-	    Model* model_ = nullptr;
+	    Model* SkydomeModel_ = nullptr;
+
+		//テクスチャハンドル
+	    uint32_t textureHandle_;
 	
 };

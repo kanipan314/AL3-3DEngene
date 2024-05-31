@@ -23,7 +23,7 @@ GameScene::~GameScene() {
 	worldTransformBlocks_.clear();
 
 	//天球の解放
-	delete Skydomemodel_;
+	delete SkydomeModel_;
 }
 
 void GameScene::Initialize() {
@@ -76,10 +76,12 @@ void GameScene::Initialize() {
 	}
 
 	//天球の生成
-	Skydomemodel_ = Model::CreateFromOBJ("skydome", true);
+	SkydomeModel_ = Model::CreateFromOBJ("skydome", true);
 
-	////天球の初期化
-	//skydome_->Initialize(&viewProjection_);
+	//天球の初期化
+	skydome_ = new Skydome();
+
+	skydome_->Initialize(SkydomeModel_, &viewProjection_);
 }
 
 void GameScene::Update() {
@@ -96,8 +98,8 @@ void GameScene::Update() {
 		}
 	}
 
-	////天球
-	//skydome_->Update();
+	//天球
+	skydome_->Update();
 
 	#ifdef _DEBUG
 
@@ -109,12 +111,18 @@ void GameScene::Update() {
 
 	#endif // DEBUG
 
-	////カメラ処理
-	//if (isDebugCameraActive_) {
-	//	debugCamera_->Update();
-	//	viewProjection_.matView = debugCamera_->GetViewProjection();
-	//	viewProjection_.matProjection = debugCamera_->GetViewProjection();
-	//}
+	//カメラ処理
+	if (isDebugCameraActive_) {
+		debugCamera_->Update();
+		viewProjection_.matView = debugCamera_->GetViewProjection().matView;
+		viewProjection_.matProjection = debugCamera_->GetViewProjection().matProjection;
+
+		//ビュープロジェクション行列の転送
+		viewProjection_.TransferMatrix();
+	} else {
+		//ビュープロジェクション行列の更新と転送
+		viewProjection_.UpdateMatrix();
+	}
 }
 
 void GameScene::Draw() {
@@ -144,8 +152,8 @@ void GameScene::Draw() {
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
 
-	////天球の描画
-	//skydome_->Drow();
+	//天球の描画
+	skydome_->Drow();
 
 	// 自キャラの描画
 	player_->Draw();
