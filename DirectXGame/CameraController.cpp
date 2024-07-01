@@ -1,5 +1,5 @@
 #include "CameraController.h"
-#include "Player.h"
+
 
 void CameraController::Initialize(ViewProjection* viewProjection) {
 	viewProjection_ = viewProjection;
