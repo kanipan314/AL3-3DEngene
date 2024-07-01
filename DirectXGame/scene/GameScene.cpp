@@ -38,7 +38,7 @@ void GameScene::Initialize() {
 	textureHandle_ = TextureManager::Load("/cube/cube.jpg");
 
 	// 3dモデルの生成
-	model_ = Model::Create();
+	model_ = Model::CreateFromOBJ("Player", true);
 	Blockmodel_ = Model::Create();
 
 	// カメラ系初期化
@@ -48,7 +48,8 @@ void GameScene::Initialize() {
 	debugCamera_ = new DebugCamera(WinApp::kWindowWidth, WinApp::kWindowHeight);
 	// 自キャラの生成
 	player_ = new Player();
-	player_->Initialize(model_, textureHandle_, &viewProjection_);
+	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(1, 19);
+	player_->Initialize(model_, &viewProjection_,playerPosition);
 
 	//// ブロック
 	//// 要素数
