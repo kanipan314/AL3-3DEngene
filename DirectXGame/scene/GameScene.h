@@ -8,6 +8,12 @@
 #include "ViewProjection.h"
 #include "WorldTransform.h"
 #include "DebugCamera.h"
+<<<<<<< Updated upstream
+=======
+#include "skydome.h"
+#include "MapChipField.h"
+#include "CameraController.h"
+>>>>>>> Stashed changes
 
 /// <summary>
 /// ゲームシーン
@@ -59,7 +65,21 @@ private: // メンバ変数
 
 	//ImGUIで値を入力する変数
 
+<<<<<<< Updated upstream
 	float inputFloat3[3] = {0, 0, 0};
+=======
+	Player* player_ = nullptr;
+	
+	//天球
+	Skydome* skydome_ = nullptr;
+
+	//マップチップフィールド
+	MapChipField* mapChipField_ = nullptr;
+
+	//追従カメラ
+	CameraController* cameraController_ = nullptr;
+	void GenerateBlocks();
+>>>>>>> Stashed changes
 
 	/// <summary>
 	/// ゲームシーン用
