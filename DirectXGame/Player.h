@@ -42,7 +42,7 @@ class Player {
 		//最大速度
 	    static inline const float kLimitRunSpeed = 0.25f;
 		//旋回時間＜秒＞
-		static inline const float kTimeTurn = 2.0f;
+		static inline const float kTimeTurn = 0.3f;
 		//旋回開始時の角度
 	    float turnFirstRotationY_ = 0.0f;
 		//旋回タイマー

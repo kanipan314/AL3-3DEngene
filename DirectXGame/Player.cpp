@@ -41,31 +41,27 @@ void Player::Update() {
 
 				if (lrDirection_ != LRDirection::kRigth) {
 					lrDirection_ = LRDirection::kRigth;
-					turnFirstRotationY_ = 180.0f;
+					turnFirstRotationY_ = std::numbers::pi_v<float> * 3.0f / 2.0f;
 					turnTimer_ = 2.1f;
 				}
 
 				if (turnTimer_ > 0.0f) {
 
-					turnTimer_ -= 0.3f;
+					turnTimer_ -= 0.1f;
 
-					//// 左右の自キャラ角度テーブル
-					// float destinationRotationYTable[2] = {std::numbers::pi_v<float> / 2.0f, std::numbers::pi_v<float> * 3.0f / 2.0f};
+					// 左右の自キャラ角度テーブル
+					 float destinationRotationYTable[2] = {std::numbers::pi_v<float> / 2.0f, std::numbers::pi_v<float> * 3.0f / 2.0f};
 
-					//// 状態に応じた角度を取得する
-					// float destinationRotationY = destinationRotationYTable[static_cast<uint32_t>(lrDirection_)];
-					//// 自キャラの角度を設定
+					// 状態に応じた角度を取得する
+					 float destinationRotationY = destinationRotationYTable[static_cast<uint32_t>(lrDirection_)];
+					// 自キャラの角度を設定
 
-					worldTransform_.rotation_.y = TurnRotation(turnTimer_);
-				} else if (turnTimer_ <= 0.0f) {
-				
-				// 左右の自キャラ角度テーブル
-				float destinationRotationYTable[2] = {std::numbers::pi_v<float> / 2.0f, std::numbers::pi_v<float> * 3.0f / 2.0f};
+					 worldTransform_.rotation_.y = TurnRotation(turnTimer_);
 
-				// 状態に応じた角度を取得する
-				float destinationRotationY = destinationRotationYTable[static_cast<uint32_t>(lrDirection_)];
+					 if (turnTimer_ <= 0.0f) {
 
-				worldTransform_.rotation_.y = destinationRotationY;
+						 worldTransform_.rotation_.y = destinationRotationY;
+					 }
 				}
 
 			} else if (Input::GetInstance()->PushKey(DIK_LEFT)) {
@@ -80,15 +76,24 @@ void Player::Update() {
 
 				if (lrDirection_ != LRDirection::kLeft) {
 					lrDirection_ = LRDirection::kLeft;
+					turnFirstRotationY_ = std::numbers::pi_v<float> / 2.0f;
+					turnTimer_ = 2.1f;
 				}
+				if (turnTimer_ > 0.0f) {
 
-				// 左右の自キャラ角度テーブル
-				float destinationRotationYTable[2] = {std::numbers::pi_v<float> / 2.0f, std::numbers::pi_v<float> * 3.0f / 2.0f};
+					turnTimer_ -= 0.1f;
 
-				// 状態に応じた角度を取得する
-				float destinationRotationY = destinationRotationYTable[static_cast<uint32_t>(lrDirection_)];
-				// 自キャラの角度を設定
-				worldTransform_.rotation_.y = destinationRotationY;
+					float destinationRotationYTable[2] = {std::numbers::pi_v<float> / 2.0f, std::numbers::pi_v<float> * 3.0f / 2.0f};
+
+					// 状態に応じた角度を取得する
+					float destinationRotationY = destinationRotationYTable[static_cast<uint32_t>(lrDirection_)];
+					// 自キャラの角度を設定
+					TurnRotation(turnTimer_);
+
+					if (turnTimer_ <= 0.0f) {
+						worldTransform_.rotation_.y = destinationRotationY;
+					}
+				}
 			}
 			// 加速/減速
 			velocity_.x += acceleration.x;
