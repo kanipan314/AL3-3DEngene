@@ -12,6 +12,7 @@
 #include "DebugCamera.h"
 #include "skydome.h"
 #include "MapChipField.h"
+#include "CaneraController.h"
 
 /// <summary>
 /// ゲームシーン
@@ -78,6 +79,11 @@ private: // メンバ変数
 	
 	//天球
 	Skydome* skydome_ = nullptr;
+
+	//カメラコントローラ
+	CaneraController* cameraController_ = nullptr;
+
+	Rect cameraArea = {0,100,0,100}; 
 
 	//マップチップフィールド
 	MapChipField* mapChipField_ = nullptr;

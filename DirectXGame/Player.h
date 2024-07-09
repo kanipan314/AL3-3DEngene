@@ -25,6 +25,11 @@ class Player {
 		///　描画
 	    void Draw();
 
+		//ワールドトランスフォーム
+	    const WorldTransform& GetWorldTransform();
+
+		const Vector3& GetVelocity() const { return velocity_; };
+
 	private:
 		///ワールド変換
 	    WorldTransform worldTransform_;

@@ -24,6 +24,8 @@ GameScene::~GameScene() {
 
 	//天球の解放
 	delete SkydomeModel_;
+	//カメラコントローラの開放
+	delete cameraController_;
 	//マップチップの開放
 	delete mapChipField_;
 }
@@ -51,22 +53,6 @@ void GameScene::Initialize() {
 	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(1, 19);
 	player_->Initialize(model_, &viewProjection_,playerPosition);
 
-	//// ブロック
-	//// 要素数
-	//const uint32_t kNumBlockVirtical = 10;
-	//const uint32_t kNumBlockHorizontal = 20;
-	//// ブロック1個分の横幅
-	//const float kBlockwidth = 2.0f;
-	//const float kBlockHeigt = 2.0f;
-
-	//// 要素数を変更する
-	//worldTransformBlocks_.resize(kNumBlockVirtical);
-	//for (uint32_t i = 0; i < kNumBlockVirtical; i++) {
-	//	worldTransformBlocks_[i].resize(kNumBlockHorizontal);
-	//}
-
-	
-
 	// 天球の生成
 	SkydomeModel_ = Model::CreateFromOBJ("skydome", true);
 
@@ -75,6 +61,15 @@ void GameScene::Initialize() {
 
 	skydome_->Initialize(SkydomeModel_, &viewProjection_);
 
+	//カメラコントローラ初期化
+	cameraController_ = new CaneraController();
+	cameraController_->Initialize(&viewProjection_);
+	cameraController_->SetTarget(player_);
+	cameraController_->Reset();
+
+	//移動範囲の指定
+	cameraController_->SetMovableArea(cameraArea);
+	
 	// マップチップ
 	mapChipField_ = new MapChipField;
 	mapChipField_->LoadMapChipCSV("./Resources/map.csv");
@@ -127,6 +122,7 @@ void GameScene::Update() {
 	//天球
 	skydome_->Update();
 
+	
 	#ifdef _DEBUG
 
 	if (input_->TriggerKey(DIK_BACKSPACE)) {
@@ -146,6 +142,9 @@ void GameScene::Update() {
 		//ビュープロジェクション行列の転送
 		viewProjection_.TransferMatrix();
 	} else {
+		// カメラコントローラ
+		cameraController_->Update();
+
 		//ビュープロジェクション行列の更新と転送
 		viewProjection_.UpdateMatrix();
 	}
