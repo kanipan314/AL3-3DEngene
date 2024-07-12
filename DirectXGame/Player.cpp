@@ -5,7 +5,37 @@
 #include "numbers"
 #include <algorithm>
 
-float TurnRotation(float timer) { return timer; }
+//float TurnRotation(float timer) { return timer; }
+
+float Lerp(float a, float b, float t) {
+
+	float answer;
+	answer = t * a + (1.0f - t) * b;
+
+	return answer;
+}
+
+
+
+void TopCollision(CollisionMapInfo info) {
+	//移動後の4つの角の座標
+	std::array<Vector3, kNumCorner> positionsNew;
+
+	for (uint32_t i = 0; i < positionsNew.size(); i++) {
+		/*positionsNew[i] = corner*/
+	}
+	info.BottomFlag = false;
+}
+void BottomCollision(CollisionMapInfo info) { info.BottomFlag = false;
+
+}
+void RightCollision(CollisionMapInfo info) { info.BottomFlag = false;
+
+}
+void LeftCollision(CollisionMapInfo info) { info.BottomFlag = false;
+
+}
+
 
 void Player::Initialize(Model* model, ViewProjection* viewProjection, const Vector3& position) {
 
@@ -24,6 +54,14 @@ void Player::Initialize(Model* model, ViewProjection* viewProjection, const Vect
 void Player::Update() {
 
 	// 移動入力
+	
+	//衝突情報を初期化
+	CollisionMapInfo collisionMapInfo;
+	//移動量に速度を値をコピー
+	collisionMapInfo.velocity = velocity_;
+	//マップ衝突チェック
+	CollisionFlag(collisionMapInfo);
+	 
 	// 接地状態
 	if (onGround_) {
 		if (Input::GetInstance()->PushKey(DIK_RIGHT) || Input::GetInstance()->PushKey(DIK_LEFT)) {
@@ -42,7 +80,7 @@ void Player::Update() {
 				if (lrDirection_ != LRDirection::kRigth) {
 					lrDirection_ = LRDirection::kRigth;
 					turnFirstRotationY_ = std::numbers::pi_v<float> * 3.0f / 2.0f;
-					turnTimer_ = 2.1f;
+					turnTimer_ = 1.0f;
 				}
 
 				if (turnTimer_ > 0.0f) {
@@ -56,12 +94,12 @@ void Player::Update() {
 					 float destinationRotationY = destinationRotationYTable[static_cast<uint32_t>(lrDirection_)];
 					// 自キャラの角度を設定
 
-					 worldTransform_.rotation_.y = TurnRotation(turnTimer_);
+					 worldTransform_.rotation_.y = Lerp(turnFirstRotationY_, destinationRotationY, turnTimer_);
 
-					 if (turnTimer_ <= 0.0f) {
-
+					 /*if (turnTimer_ <= 0.0f) {
+					 ,
 						 worldTransform_.rotation_.y = destinationRotationY;
-					 }
+					 }*/
 				}
 
 			} else if (Input::GetInstance()->PushKey(DIK_LEFT)) {
@@ -77,7 +115,7 @@ void Player::Update() {
 				if (lrDirection_ != LRDirection::kLeft) {
 					lrDirection_ = LRDirection::kLeft;
 					turnFirstRotationY_ = std::numbers::pi_v<float> / 2.0f;
-					turnTimer_ = 2.1f;
+					turnTimer_ = 1.0f;
 				}
 				if (turnTimer_ > 0.0f) {
 
@@ -88,11 +126,8 @@ void Player::Update() {
 					// 状態に応じた角度を取得する
 					float destinationRotationY = destinationRotationYTable[static_cast<uint32_t>(lrDirection_)];
 					// 自キャラの角度を設定
-					TurnRotation(turnTimer_);
+					worldTransform_.rotation_.y = Lerp(turnFirstRotationY_, destinationRotationY, turnTimer_);
 
-					if (turnTimer_ <= 0.0f) {
-						worldTransform_.rotation_.y = destinationRotationY;
-					}
 				}
 			}
 			// 加速/減速
@@ -148,6 +183,8 @@ void Player::Update() {
 	worldTransform_.translation_.y += velocity_.y;
 	worldTransform_.translation_.z += velocity_.z;
 
+
+
 	// 行列計算
 	worldTransform_.UpdateMatrix();
 
@@ -158,3 +195,26 @@ void Player::Update() {
 void Player::Draw() { model_->Draw(worldTransform_, *viewProjection_, textureHandle_); }
 
 const WorldTransform& Player::GetWorldTransform() { return worldTransform_; }
+
+void Player::CollisionFlag(CollisionMapInfo& info) {
+
+	TopCollision(info);
+
+
+}
+
+Vector3 Player::CornerPosition(const Vector3& center, Corner corner) {
+	Vector3 offSetTable[kNumCorner] = {
+	    {+kWidth / 2.0f, -kHeight / 2.0f, 0},
+        {-kWidth / 2.0f, -kHeight / 2.0f, 0},
+        {+kWidth / 2.0f, +kHeight / 2.0f, 0},
+        {-kWidth / 2.0f, +kHeight / 2.0f, 0}
+    };
+
+	Vector3 answer;
+	answer.x = center.x + offSetTable[static_cast<uint32_t>(corner)].x;
+	answer.y = center.y + offSetTable[static_cast<uint32_t>(corner)].y;
+	answer.z = center.z + offSetTable[static_cast<uint32_t>(corner)].z;
+
+	return answer;
+}

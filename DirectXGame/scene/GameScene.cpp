@@ -50,8 +50,9 @@ void GameScene::Initialize() {
 	debugCamera_ = new DebugCamera(WinApp::kWindowWidth, WinApp::kWindowHeight);
 	// 自キャラの生成
 	player_ = new Player();
-	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(1, 19);
+	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(1, 18);
 	player_->Initialize(model_, &viewProjection_,playerPosition);
+	player_->SetMapChipField(mapChipField_);
 
 	// 天球の生成
 	SkydomeModel_ = Model::CreateFromOBJ("skydome", true);
