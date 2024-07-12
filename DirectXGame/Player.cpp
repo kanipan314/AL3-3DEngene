@@ -5,7 +5,13 @@
 #include "numbers"
 #include <algorithm>
 
-float TurnRotation(float timer) { return timer; }
+float Lerp(float a, float b, float t) {
+
+	float answer;
+	answer = t * a + (1.0f - t) * b;
+
+	return answer;
+}
 
 void Player::Initialize(Model* model, ViewProjection* viewProjection, const Vector3& position) {
 
@@ -42,7 +48,7 @@ void Player::Update() {
 				if (lrDirection_ != LRDirection::kRigth) {
 					lrDirection_ = LRDirection::kRigth;
 					turnFirstRotationY_ = std::numbers::pi_v<float> * 3.0f / 2.0f;
-					turnTimer_ = 2.1f;
+					turnTimer_ = 1.0f;
 				}
 
 				if (turnTimer_ > 0.0f) {
@@ -56,12 +62,7 @@ void Player::Update() {
 					 float destinationRotationY = destinationRotationYTable[static_cast<uint32_t>(lrDirection_)];
 					// 自キャラの角度を設定
 
-					 worldTransform_.rotation_.y = TurnRotation(turnTimer_);
-
-					 if (turnTimer_ <= 0.0f) {
-
-						 worldTransform_.rotation_.y = destinationRotationY;
-					 }
+					worldTransform_.rotation_.y = Lerp(turnFirstRotationY_, destinationRotationY, turnTimer_);
 				}
 
 			} else if (Input::GetInstance()->PushKey(DIK_LEFT)) {
@@ -77,7 +78,7 @@ void Player::Update() {
 				if (lrDirection_ != LRDirection::kLeft) {
 					lrDirection_ = LRDirection::kLeft;
 					turnFirstRotationY_ = std::numbers::pi_v<float> / 2.0f;
-					turnTimer_ = 2.1f;
+					turnTimer_ = 1.0f;
 				}
 				if (turnTimer_ > 0.0f) {
 
@@ -88,11 +89,7 @@ void Player::Update() {
 					// 状態に応じた角度を取得する
 					float destinationRotationY = destinationRotationYTable[static_cast<uint32_t>(lrDirection_)];
 					// 自キャラの角度を設定
-					TurnRotation(turnTimer_);
-
-					if (turnTimer_ <= 0.0f) {
-						worldTransform_.rotation_.y = destinationRotationY;
-					}
+					worldTransform_.rotation_.y = Lerp(turnFirstRotationY_, destinationRotationY, turnTimer_);
 				}
 			}
 			// 加速/減速
