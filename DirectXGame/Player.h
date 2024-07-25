@@ -63,6 +63,9 @@ class Player {
 	    void LeftCollision(CollisionMapInfo info);
 	    void RightCollision(CollisionMapInfo info);
 
+		void Move(const CollisionMapInfo& info);
+	    void CeilingMove(const CollisionMapInfo& info);
+
 	private:
 		///ワールド変換
 	    WorldTransform worldTransform_;
@@ -91,9 +94,9 @@ class Player {
 		//重力加速度
 	    static inline const float kGravityAcceleration = 0.98f;
 		//最大落下速度
-	    static inline const float kLimitFallSpeed = 0.25f;
+	    static inline const float kLimitFallSpeed = 1.5f;
 		//ジャンプ初速
-	    static inline const float kJumpAcceleration = 2.5f;
+	    static inline const float kJumpAcceleration =2.5f;
 
 		LRDirection lrDirection_ = LRDirection::kRigth;
 
@@ -103,6 +106,9 @@ class Player {
 		//キャラの当たり判定
 	    static inline const float kWidth = 0.8f;
 	    static inline const float kHeight = 0.8f;
+
+
+		static inline const float kBlank = 0.8f;
 
 };
 

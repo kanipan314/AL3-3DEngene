@@ -4,6 +4,7 @@
 #include "MapChipField.h"
 #include "cassert"
 #include "numbers"
+#include "ImGuiManager.h"
 #include <algorithm>
 
 // float TurnRotation(float timer) { return timer; }
@@ -68,13 +69,39 @@ void Player::TopCollision(CollisionMapInfo info) {
 		hit = true;
 	}
 
-	// 右上点の判定
+	if (hit) {
 
-	indexSet = mapChipField_->GetMapChipIndexSetPosition(positionsNew[kRightTom]);
-	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
-	if (mapChipType == MapChipType::kBlock) {
-		hit = true;
+		// めり込みを排除する
+		indexSet = mapChipField_->GetMapChipIndexSetPosition(positionsNew[kLeftTop]);
+		// めり込み先のブロック範囲
+		BlockRect rect = mapChipField_->GetRectByIndex(indexSet.xIndex, indexSet.yIndex);
+		info.velocity.y = std::max(0.0f, velocity_.y);
+		// 天井に当たった子を記録する
+		info.TopFlag = true;
 	}
+
+	// 右上点の判定
+	if (!hit) {
+
+		indexSet = mapChipField_->GetMapChipIndexSetPosition(positionsNew[kRightTom]);
+		mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
+		if (mapChipType == MapChipType::kBlock) {
+			hit = true;
+		}
+
+		if (hit) {
+
+			// めり込みを排除する
+			indexSet = mapChipField_->GetMapChipIndexSetPosition(positionsNew[kRightTom]);
+			// めり込み先のブロック範囲
+			BlockRect rect = mapChipField_->GetRectByIndex(indexSet.xIndex, indexSet.yIndex);
+			info.velocity.y = std::max(0.0f, velocity_.y);
+			// 天井に当たった子を記録する
+			info.TopFlag = true;
+		}
+	}
+	Move(info);
+
 }
 void Player::BottomCollision(CollisionMapInfo info) {
 	info.BottomFlag = false;
@@ -97,6 +124,24 @@ void Player::RightCollision(CollisionMapInfo info) {
 		    {worldTransform_.translation_.x + info.velocity.x, worldTransform_.translation_.y + info.velocity.y, worldTransform_.translation_.z + info.velocity.x}, static_cast<Corner>(i));
 	}
 	info.WallFlag = false;
+}
+void Player::Move(const CollisionMapInfo& info) {
+
+	CeilingMove(info);
+
+	//移動
+	worldTransform_.translation_ += info.velocity;
+
+}
+void Player::CeilingMove(const CollisionMapInfo& info) {
+
+	//天井に当たった？
+	if (info.TopFlag) {
+	
+		velocity_.y = 0;
+
+	}
+
 }
 void Player::LeftCollision(CollisionMapInfo info) {
 	info.BottomFlag = false;
