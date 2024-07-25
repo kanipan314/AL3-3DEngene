@@ -50,11 +50,18 @@ class Player {
 
 		const Vector3& GetVelocity() const { return velocity_; };
 
-		void SetMapChipField(MapChipField* mapChipField) { mapChipField_ = mapChipField; };
+		void SetMapChipField(MapChipField* mapChipField) { 
+			mapChipField_ = mapChipField; 
+		};
 
 		void CollisionFlag(CollisionMapInfo& info);
 
-		Vector3 CornerPosition(const Vector3& center, Corner corner);
+		static Vector3 CornerPosition(const Vector3& center, Corner corner);
+		
+		void TopCollision(CollisionMapInfo info);
+	    void BottomCollision(CollisionMapInfo info);
+	    void LeftCollision(CollisionMapInfo info);
+	    void RightCollision(CollisionMapInfo info);
 
 	private:
 		///ワールド変換
