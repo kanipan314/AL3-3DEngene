@@ -98,7 +98,7 @@ class Player {
 		//最大落下速度
 	    static inline const float kLimitFallSpeed = 1.5f;
 		//ジャンプ初速
-	    static inline const float kJumpAcceleration =2.5f;
+	    static inline const float kJumpAcceleration = 1.5f;
 
 		LRDirection lrDirection_ = LRDirection::kRigth;
 
