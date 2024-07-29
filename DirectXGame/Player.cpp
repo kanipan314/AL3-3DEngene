@@ -104,7 +104,15 @@ void Player::TopCollision(CollisionMapInfo info) {
 
 }
 void Player::BottomCollision(CollisionMapInfo info) {
+
+	// 下降？
+	if (info.velocity.y >= 0) {
+		return;
+	}
+
+
 	info.BottomFlag = false;
+	
 	// 移動後の4つの角の座標
 	std::array<Vector3, kNumCorner> positionsNew;
 
@@ -112,7 +120,53 @@ void Player::BottomCollision(CollisionMapInfo info) {
 		positionsNew[i] = Player::CornerPosition(
 		    {worldTransform_.translation_.x + info.velocity.x, worldTransform_.translation_.y + info.velocity.y, worldTransform_.translation_.z + info.velocity.x}, static_cast<Corner>(i));
 	}
-	info.BottomFlag = false;
+	
+	MapChipType mapChipType;
+
+	//真下の当たり判定を行う
+	bool hit = false;
+
+	//左下点の判定
+	IndexSet indexSet;
+	indexSet = mapChipField_->GetMapChipIndexSetPosition(positionsNew[kLeftBottom]);
+
+	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
+
+	if (mapChipType == MapChipType::kBlock) {
+		hit = true;
+	}
+
+	if (hit) {
+
+		// めり込みを排除する
+		indexSet = mapChipField_->GetMapChipIndexSetPosition(positionsNew[kLeftBottom]);
+		// めり込み先のブロック範囲
+		BlockRect rect = mapChipField_->GetRectByIndex(indexSet.xIndex, indexSet.yIndex);
+		info.velocity.y = std::max(0.0f, velocity_.y);
+		// 天井に当たった子を記録する
+		info.BottomFlag = true;
+	}
+	// 右上点の判定
+	if (!hit) {
+
+		indexSet = mapChipField_->GetMapChipIndexSetPosition(positionsNew[kRightBottom]);
+		mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
+		if (mapChipType == MapChipType::kBlock) {
+			hit = true;
+		}
+
+		if (hit) {
+
+			// めり込みを排除する
+			indexSet = mapChipField_->GetMapChipIndexSetPosition(positionsNew[kRightBottom]);
+			// めり込み先のブロック範囲
+			BlockRect rect = mapChipField_->GetRectByIndex(indexSet.xIndex, indexSet.yIndex);
+			info.velocity.y = std::max(0.0f, velocity_.y);
+			// 天井に当たった子を記録する
+			info.BottomFlag = true;
+		}
+	}
+	
 }
 void Player::RightCollision(CollisionMapInfo info) {
 	info.BottomFlag = false;
@@ -139,6 +193,38 @@ void Player::CeilingMove(const CollisionMapInfo& info) {
 	if (info.TopFlag) {
 	
 		velocity_.y = 0;
+
+	}
+
+}
+void Player::ChangeGround(const CollisionMapInfo& info) {
+
+	//自キャラが接地状態
+	if (onGround_) {
+
+		//ジャンプ開始
+		if (velocity_.y > 0.0f) {
+			onGround_ = false;
+		} else {
+		
+			BottomCollision(info);
+
+		}
+
+	} else {
+	
+		//着地フラグ
+		if (info.BottomFlag) {
+		
+			//着地状態に切り替える(落下を止める
+			onGround_ = true;
+			//着地にX速度を減衰
+			velocity_.x *= (1.0f - kAttenuation);
+			//Y速度をゼロにする
+			velocity_.y = 0.0f;
+
+
+		}
 
 	}
 
@@ -201,24 +287,24 @@ void Player::Update() {
 					turnTimer_ = 1.0f;
 				}
 
-				if (turnTimer_ > 0.0f) {
+				//if (turnTimer_ > 0.0f) {
 
-					turnTimer_ -= 0.1f;
+				//	// 左右の自キャラ角度テーブル
+				//	float destinationRotationYTable[2] = {std::numbers::pi_v<float> / 2.0f, std::numbers::pi_v<float> * 3.0f / 2.0f};
 
-					// 左右の自キャラ角度テーブル
-					float destinationRotationYTable[2] = {std::numbers::pi_v<float> / 2.0f, std::numbers::pi_v<float> * 3.0f / 2.0f};
+				//	// 状態に応じた角度を取得する
+				//	float destinationRotationY = destinationRotationYTable[static_cast<uint32_t>(lrDirection_)];
+				//	// 自キャラの角度を設定
 
-					// 状態に応じた角度を取得する
-					float destinationRotationY = destinationRotationYTable[static_cast<uint32_t>(lrDirection_)];
-					// 自キャラの角度を設定
+				//	worldTransform_.rotation_.y = Lerp(turnFirstRotationY_, destinationRotationY, turnTimer_);
 
-					worldTransform_.rotation_.y = Lerp(turnFirstRotationY_, destinationRotationY, turnTimer_);
+				//	/*if (turnTimer_ <= 0.0f) {
+				//	,
+				//	    worldTransform_.rotation_.y = destinationRotationY;
+				//	}*/
+				//}
+				
 
-					/*if (turnTimer_ <= 0.0f) {
-					,
-					    worldTransform_.rotation_.y = destinationRotationY;
-					}*/
-				}
 
 			} else if (Input::GetInstance()->PushKey(DIK_LEFT)) {
 
@@ -230,22 +316,15 @@ void Player::Update() {
 
 				acceleration.x -= kAcceleration;
 
+
 				if (lrDirection_ != LRDirection::kLeft) {
 					lrDirection_ = LRDirection::kLeft;
 					turnFirstRotationY_ = std::numbers::pi_v<float> / 2.0f;
 					turnTimer_ = 1.0f;
 				}
-				if (turnTimer_ > 0.0f) {
+				
+				
 
-					turnTimer_ -= 0.1f;
-
-					float destinationRotationYTable[2] = {std::numbers::pi_v<float> / 2.0f, std::numbers::pi_v<float> * 3.0f / 2.0f};
-
-					// 状態に応じた角度を取得する
-					float destinationRotationY = destinationRotationYTable[static_cast<uint32_t>(lrDirection_)];
-					// 自キャラの角度を設定
-					worldTransform_.rotation_.y = Lerp(turnFirstRotationY_, destinationRotationY, turnTimer_);
-				}
 			}
 			// 加速/減速
 			velocity_.x += acceleration.x;
@@ -294,6 +373,18 @@ void Player::Update() {
 			onGround_ = true;
 		}
 	}
+
+	if (turnTimer_ > 0.0f) {
+
+		float destinationRotationYTable[2] = {std::numbers::pi_v<float> / 2.0f, std::numbers::pi_v<float> * 3.0f / 2.0f};
+
+		// 状態に応じた角度を取得する
+		float destinationRotationY = destinationRotationYTable[static_cast<uint32_t>(lrDirection_)];
+		// 自キャラの角度を設定
+		worldTransform_.rotation_.y = Lerp(turnFirstRotationY_, destinationRotationY, turnTimer_);
+		turnTimer_ -= 0.1f;
+	}
+
 
 	// 移動
 	worldTransform_.translation_.x += velocity_.x;

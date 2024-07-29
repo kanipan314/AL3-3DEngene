@@ -66,6 +66,8 @@ class Player {
 		void Move(const CollisionMapInfo& info);
 	    void CeilingMove(const CollisionMapInfo& info);
 
+		void ChangeGround(const CollisionMapInfo& info);
+
 	private:
 		///ワールド変換
 	    WorldTransform worldTransform_;
@@ -109,6 +111,7 @@ class Player {
 
 
 		static inline const float kBlank = 0.8f;
+	    static inline const float kAttenuationLanding = 0.8f;
 
 };
 
