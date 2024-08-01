@@ -23,6 +23,7 @@
 class GameScene {
 
 	std::vector<std::vector<WorldTransform*>> worldTransformBlocks_;
+	std::list<Enemy*> enemies_;
 
 public: // メンバ関数
 	/// <summary>
@@ -50,7 +51,11 @@ public: // メンバ関数
 	/// </summary>
 	void Draw();
 
-    
+    //全ての当たり判定を行う
+	void CheckAllCollisions();
+
+	//交差判定
+	bool IsCollision(AABB aabb1, AABB aabb2);
 
 	//デバッグカメラ
 	DebugCamera* debugCamera_ = nullptr;

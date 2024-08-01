@@ -15,7 +15,10 @@ GameScene::~GameScene() {
 	delete player_;
 
 	//敵キャラの開放
-	delete enemy_;
+	for (Enemy* enemyList : enemies_){
+		delete enemyList;
+	}
+	enemies_.clear();
 
 	//	ブロックの解放
 	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
@@ -58,15 +61,26 @@ void GameScene::Initialize() {
 	mapChipField_->LoadMapChipCSV("./Resources/map.csv");
 	GenerateBlocks();
 
-	// 敵キャラの生成
-	enemy_ = new Enemy();
-	enemy_->Initialize(enemyModel_, &viewProjection_);
+	//// 敵キャラの生成
+	//enemy_ = new Enemy();
+	//enemy_->Initialize(enemyModel_, &viewProjection_,);
 
 	// 自キャラの生成
 	player_ = new Player();
 	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(1, 18);
 	player_->Initialize(model_, &viewProjection_,playerPosition);
 	player_->SetMapChipField(mapChipField_);
+
+	for (float i = 0; i < 5; i++) {
+
+		Enemy* newEnemy = new Enemy();
+		Vector3 enemyPosition = {i * 5 + 15, 3.0f, 0.0f};
+
+		newEnemy->Initialize(enemyModel_, &viewProjection_, enemyPosition);
+
+		enemies_.push_back(newEnemy);
+	}
+
 	
 
 	// 天球の生成
@@ -131,11 +145,21 @@ void GameScene::Update() {
 		}
 	}
 
+	
 	//敵キャラの更新
-	enemy_->Update();
+	for (Enemy* enmeyList : enemies_) {
+
+		enmeyList->Update();
+
+	}
+	
+
 
 	//天球
 	skydome_->Update();
+
+	//当たり判定
+	CheckAllCollisions();
 
 	
 	#ifdef _DEBUG
@@ -199,7 +223,10 @@ void GameScene::Draw() {
 	player_->Draw();
 
 	//敵キャラの描画
-	enemy_->Draw();
+	for (Enemy* enmeyList : enemies_) {
+
+		enmeyList->Draw();
+	}
 
 	// ブロックの描画
 	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
@@ -229,5 +256,46 @@ void GameScene::Draw() {
 
 	
 }
+
+#pragma region 自キャラと敵キャラの当たり判定
+
+void GameScene::CheckAllCollisions() {
+
+	//判定対象1と2の座標
+	AABB aabb1, aabb2;
+	//じきゃらのざひょう
+	aabb1 = player_->GetAABB();
+	
+	//自キャラと敵の当たり判定
+	for (Enemy* enemy : enemies_) {
+	
+		//敵キャラの座標
+		aabb2 = enemy->GetAABB();
+
+		//ＡＡＢＢ同士の考査判定
+		if (IsCollision(aabb1, aabb2)) {
+			//自キャラの衝突時コールバックを呼び出す
+			player_->OnCollision(enemy);
+			//敵の衝突時コールバックを呼び出す
+			enemy->OnCollision(player_);
+		}
+
+	}
+
+}
+
+bool GameScene::IsCollision(AABB aabb1, AABB aabb2) { 
+	
+	if ((aabb1.min.x <= aabb2.max.x && aabb1.max.x >= aabb2.min.x) &&
+		(aabb1.min.y <= aabb2.max.y && aabb1.max.y >= aabb2.min.y) && 
+		(aabb1.min.z <= aabb2.max.z && aabb1.max.z >= aabb2.min.z)) {
+
+		return true;
+
+	}
+
+	return false; }
+
+#pragma endregion
 
 

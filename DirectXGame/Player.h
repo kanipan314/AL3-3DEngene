@@ -3,6 +3,7 @@
 #include "Sprite.h"
 #include "ViewProjection.h"
 #include "WorldTransform.h"
+#include "AABB.h"
 
 /// <summary>
 /// 自キャラ
@@ -32,6 +33,8 @@ struct CollisionMapInfo {
 };
 
 class MapChipField;
+
+class Enemy;
 
 class Player {
 
@@ -68,6 +71,15 @@ class Player {
 
 		void ChangeGround(const CollisionMapInfo& info);
 
+		//ワールド座標を取得
+	    Vector3 GetWorldPosition();
+
+		//AABBを取得
+	    AABB GetAABB();
+
+		//衝突応答
+	    void OnCollision(const Enemy* enemy);
+
 	private:
 		///ワールド変換
 	    WorldTransform worldTransform_;
@@ -94,7 +106,7 @@ class Player {
 		//接地状態フラグ
 	    bool onGround_ = true;
 		//重力加速度
-	    static inline const float kGravityAcceleration = 0.98f;
+	    static inline const float kGravityAcceleration = 0.2f;
 		//最大落下速度
 	    static inline const float kLimitFallSpeed = 1.5f;
 		//ジャンプ初速
@@ -112,6 +124,8 @@ class Player {
 
 		static inline const float kBlank = 0.8f;
 	    static inline const float kAttenuationLanding = 0.8f;
+
+		
 
 };
 

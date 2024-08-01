@@ -3,18 +3,29 @@
 #include "Sprite.h"
 #include "ViewProjection.h"
 #include "WorldTransform.h"
+#include "AABB.h"
+
+class Player;
 
 class Enemy {
 
 public:
 	//初期化
-	void Initialize(Model* model,ViewProjection* viewProjection); 
+	void Initialize(Model* model, ViewProjection* viewProjection, const Vector3& position_); 
 	
 	//更新
 	void Update();
 
 	//描画
 	void Draw();
+
+	// ワールド座標を取得
+	Vector3 GetWorldPosition();
+	// AABBを取得
+	AABB GetAABB();
+	//衝突応答
+	void OnCollision(const Player* player);
+
 
 private:
 
@@ -34,7 +45,7 @@ private:
 	static inline const float kWalkMotionAngleStart = 90.0f;
 
 	//最後の角度
-	static inline const float kWalkMotionAngleEnd = 180.0f;
+	static inline const float kWalkMotionAngleEnd = 720.0f;
 
 	//アニメーションの周期となる時間
 	static inline const float kWalkMotionTime = 2.0f;
