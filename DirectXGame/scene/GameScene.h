@@ -16,6 +16,7 @@
 #include "MapChipField.h"
 #include "CaneraController.h"
 #include "ImGuiManager.h"
+#include "DeatheParticle.h"
 
 /// <summary>
 /// ゲームシーン
@@ -68,6 +69,7 @@ private: // メンバ変数
 	Model* model_ = nullptr;
 	Model* enemyModel_ = nullptr;
 	Model* Blockmodel_ = nullptr;
+	Model* particleModel_ = nullptr;
 	Model* SkydomeModel_ = nullptr;
 
 	// でバックカメラ有効
@@ -88,6 +90,9 @@ private: // メンバ変数
 
 	//敵キャラ
 	Enemy* enemy_ = nullptr;
+
+	//パーティクル
+	DeatheParticle* deathParticles_ = nullptr;
 	
 	//天球
 	Skydome* skydome_ = nullptr;

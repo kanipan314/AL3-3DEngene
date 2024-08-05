@@ -28,6 +28,9 @@ GameScene::~GameScene() {
 	}
 	worldTransformBlocks_.clear();
 
+	//パーティクルの開放
+	delete deathParticles_;
+
 	//天球の解放
 	delete SkydomeModel_;
 	//カメラコントローラの開放
@@ -48,6 +51,7 @@ void GameScene::Initialize() {
 	// 3dモデルの生成
 	model_ = Model::CreateFromOBJ("Player", true);
 	enemyModel_ = Model::CreateFromOBJ("Enemy", true);
+	particleModel_ = Model::CreateFromOBJ("Paticle", true);
 	Blockmodel_ = Model::Create();
 
 	// カメラ系初期化
@@ -81,7 +85,9 @@ void GameScene::Initialize() {
 		enemies_.push_back(newEnemy);
 	}
 
-	
+	//仮
+	deathParticles_ = new DeatheParticle;
+	deathParticles_->Initialize(particleModel_, &viewProjection_, playerPosition);
 
 	// 天球の生成
 	SkydomeModel_ = Model::CreateFromOBJ("skydome", true);
@@ -153,7 +159,10 @@ void GameScene::Update() {
 
 	}
 	
-
+	//パーティクル更新
+	if (deathParticles_) {
+		deathParticles_->Update();
+	}
 
 	//天球
 	skydome_->Update();
@@ -237,6 +246,14 @@ void GameScene::Draw() {
 			Blockmodel_->Draw(*worldTransformBlock, viewProjection_);
 		}
 	}
+
+	//パーティクルの描画
+	if (deathParticles_) {
+	
+		deathParticles_->Draw();
+
+	}
+
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();
 #pragma endregion
