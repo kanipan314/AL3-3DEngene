@@ -256,7 +256,9 @@ void Player::OnCollision(const Enemy* enemy) {
 
 	(void)enemy;
 	//ジャンプ開始
-	velocity_ += Vector3(0, kJumpAcceleration, 0);
+	/*velocity_ += Vector3(0, kJumpAcceleration, 0);*/
+
+	isDead_ = true;
 
 }
 void Player::LeftCollision(CollisionMapInfo info) {

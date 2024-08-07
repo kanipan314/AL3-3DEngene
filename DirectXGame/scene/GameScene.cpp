@@ -14,8 +14,8 @@ GameScene::~GameScene() {
 	// 自キャラの解放
 	delete player_;
 
-	//敵キャラの開放
-	for (Enemy* enemyList : enemies_){
+	// 敵キャラの開放
+	for (Enemy* enemyList : enemies_) {
 		delete enemyList;
 	}
 	enemies_.clear();
@@ -28,18 +28,21 @@ GameScene::~GameScene() {
 	}
 	worldTransformBlocks_.clear();
 
-	//パーティクルの開放
+	// パーティクルの開放
 	delete deathParticles_;
 
-	//天球の解放
+	// 天球の解放
 	delete SkydomeModel_;
-	//カメラコントローラの開放
+	// カメラコントローラの開放
 	delete cameraController_;
-	//マップチップの開放
+	// マップチップの開放
 	delete mapChipField_;
 }
 
 void GameScene::Initialize() {
+
+	// ゲームプレイフェーズから
+	phase_ = Phase::kPlay;
 
 	dxCommon_ = DirectXCommon::GetInstance();
 	input_ = Input::GetInstance();
@@ -66,13 +69,13 @@ void GameScene::Initialize() {
 	GenerateBlocks();
 
 	//// 敵キャラの生成
-	//enemy_ = new Enemy();
-	//enemy_->Initialize(enemyModel_, &viewProjection_,);
+	// enemy_ = new Enemy();
+	// enemy_->Initialize(enemyModel_, &viewProjection_,);
 
 	// 自キャラの生成
 	player_ = new Player();
 	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(1, 18);
-	player_->Initialize(model_, &viewProjection_,playerPosition);
+	player_->Initialize(model_, &viewProjection_, playerPosition);
 	player_->SetMapChipField(mapChipField_);
 
 	for (float i = 0; i < 5; i++) {
@@ -85,7 +88,7 @@ void GameScene::Initialize() {
 		enemies_.push_back(newEnemy);
 	}
 
-	//仮
+	// 仮
 	deathParticles_ = new DeatheParticle;
 	deathParticles_->Initialize(particleModel_, &viewProjection_, playerPosition);
 
@@ -97,15 +100,14 @@ void GameScene::Initialize() {
 
 	skydome_->Initialize(SkydomeModel_, &viewProjection_);
 
-	//カメラコントローラ初期化
+	// カメラコントローラ初期化
 	cameraController_ = new CaneraController();
 	cameraController_->Initialize(&viewProjection_);
 	cameraController_->SetTarget(player_);
 	cameraController_->Reset();
 
-	//移動範囲の指定
+	// 移動範囲の指定
 	cameraController_->SetMovableArea(cameraArea);
-
 }
 
 void GameScene::GenerateBlocks() {
@@ -114,11 +116,11 @@ void GameScene::GenerateBlocks() {
 	uint32_t numBlockVirtical = mapChipField_->GetNumBlockVirtical();
 	uint32_t numBlockHorizontal = mapChipField_->GetNumBlockHorizontal();
 
-	//要素数を変更する
-	//列数を設定（縦方向）
+	// 要素数を変更する
+	// 列数を設定（縦方向）
 	worldTransformBlocks_.resize(numBlockVirtical);
 	for (uint32_t i = 0; i < numBlockVirtical; i++) {
-		//1列の要素数を設定(横方向)
+		// 1列の要素数を設定(横方向)
 		worldTransformBlocks_[i].resize(numBlockHorizontal);
 	}
 
@@ -131,7 +133,6 @@ void GameScene::GenerateBlocks() {
 				worldTransform->Initialize();
 				worldTransformBlocks_[i][j] = worldTransform;
 				worldTransformBlocks_[i][j]->translation_ = mapChipField_->GetMapChipPositionByIndex(j, i);
-
 			}
 		}
 	}
@@ -139,62 +140,111 @@ void GameScene::GenerateBlocks() {
 
 void GameScene::Update() {
 
-	// 自キャラの更新
-	player_->Update();
+	ChangePhase();
 
-	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
-		for (WorldTransform* worldTransformBlock : worldTransformBlockLine) {
-			if (!worldTransformBlock)
-				continue;
+	switch (phase_) {
+	case Phase::kPlay:
 
-			worldTransformBlock->UpdateMatrix();
+		// 自キャラの更新
+		player_->Update();
+
+		for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
+			for (WorldTransform* worldTransformBlock : worldTransformBlockLine) {
+				if (!worldTransformBlock)
+					continue;
+
+				worldTransformBlock->UpdateMatrix();
+			}
 		}
-	}
 
-	
-	//敵キャラの更新
-	for (Enemy* enmeyList : enemies_) {
+		// 敵キャラの更新
+		for (Enemy* enmeyList : enemies_) {
 
-		enmeyList->Update();
+			enmeyList->Update();
+		}
 
-	}
-	
-	//パーティクル更新
-	if (deathParticles_) {
-		deathParticles_->Update();
-	}
+		// 天球
+		skydome_->Update();
 
-	//天球
-	skydome_->Update();
+		// 当たり判定
+		CheckAllCollisions();
 
-	//当たり判定
-	CheckAllCollisions();
+		#ifdef _DEBUG
 
-	
-	#ifdef _DEBUG
+		if (input_->TriggerKey(DIK_BACKSPACE)) {
 
-	if (input_->TriggerKey(DIK_BACKSPACE)) {
-	
-		isDebugCameraActive_ = true;
+			isDebugCameraActive_ = true;
+		}
 
-	}
+#endif // DEBUG
 
-	#endif // DEBUG
+		// カメラ処理
+		if (isDebugCameraActive_) {
+			debugCamera_->Update();
+			viewProjection_.matView = debugCamera_->GetViewProjection().matView;
+			viewProjection_.matProjection = debugCamera_->GetViewProjection().matProjection;
 
-	//カメラ処理
-	if (isDebugCameraActive_) {
-		debugCamera_->Update();
-		viewProjection_.matView = debugCamera_->GetViewProjection().matView;
-		viewProjection_.matProjection = debugCamera_->GetViewProjection().matProjection;
+			// ビュープロジェクション行列の転送
+			viewProjection_.TransferMatrix();
+		} else {
+			// カメラコントローラ
+			cameraController_->Update();
 
-		//ビュープロジェクション行列の転送
-		viewProjection_.TransferMatrix();
-	} else {
-		// カメラコントローラ
-		cameraController_->Update();
+			// ビュープロジェクション行列の更新と転送
+			viewProjection_.UpdateMatrix();
+		}
 
-		//ビュープロジェクション行列の更新と転送
-		viewProjection_.UpdateMatrix();
+		break;
+
+	case Phase::kDeath:
+
+		// 天球
+		skydome_->Update();
+		// 敵キャラの更新
+		for (Enemy* enmeyList : enemies_) {
+
+			enmeyList->Update();
+		}
+
+		// パーティクル更新
+		if (deathParticles_) {
+			deathParticles_->Update();
+		}
+
+		#ifdef _DEBUG
+
+		if (input_->TriggerKey(DIK_BACKSPACE)) {
+
+			isDebugCameraActive_ = true;
+		}
+
+#endif // DEBUG
+
+		// カメラ処理
+		if (isDebugCameraActive_) {
+			debugCamera_->Update();
+			viewProjection_.matView = debugCamera_->GetViewProjection().matView;
+			viewProjection_.matProjection = debugCamera_->GetViewProjection().matProjection;
+
+			// ビュープロジェクション行列の転送
+			viewProjection_.TransferMatrix();
+		} else {
+			// カメラコントローラ
+			cameraController_->Update();
+
+			// ビュープロジェクション行列の更新と転送
+			viewProjection_.UpdateMatrix();
+		}
+
+		for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
+			for (WorldTransform* worldTransformBlock : worldTransformBlockLine) {
+				if (!worldTransformBlock)
+					continue;
+
+				worldTransformBlock->UpdateMatrix();
+			}
+		}
+		break;
 	}
 }
 
@@ -225,13 +275,16 @@ void GameScene::Draw() {
 	/// ここに3Dオブジェクトの描画処理を追加できる
 	/// </summary>
 
-	//天球の描画
+	// 天球の描画
 	skydome_->Drow();
 
-	// 自キャラの描画
-	player_->Draw();
+	if (player_->ISDead() == false) {
 
-	//敵キャラの描画
+		// 自キャラの描画
+		player_->Draw();
+	}
+
+	// 敵キャラの描画
 	for (Enemy* enmeyList : enemies_) {
 
 		enmeyList->Draw();
@@ -247,11 +300,10 @@ void GameScene::Draw() {
 		}
 	}
 
-	//パーティクルの描画
+	// パーティクルの描画
 	if (deathParticles_) {
-	
-		deathParticles_->Draw();
 
+		deathParticles_->Draw();
 	}
 
 	// 3Dオブジェクト描画後処理
@@ -270,49 +322,73 @@ void GameScene::Draw() {
 	Sprite::PostDraw();
 
 #pragma endregion
-
-	
 }
 
 #pragma region 自キャラと敵キャラの当たり判定
 
 void GameScene::CheckAllCollisions() {
 
-	//判定対象1と2の座標
+	// 判定対象1と2の座標
 	AABB aabb1, aabb2;
-	//じきゃらのざひょう
+	// じきゃらのざひょう
 	aabb1 = player_->GetAABB();
-	
-	//自キャラと敵の当たり判定
+
+	// 自キャラと敵の当たり判定
 	for (Enemy* enemy : enemies_) {
-	
-		//敵キャラの座標
+
+		// 敵キャラの座標
 		aabb2 = enemy->GetAABB();
 
-		//ＡＡＢＢ同士の考査判定
+		// ＡＡＢＢ同士の考査判定
 		if (IsCollision(aabb1, aabb2)) {
-			//自キャラの衝突時コールバックを呼び出す
+			// 自キャラの衝突時コールバックを呼び出す
 			player_->OnCollision(enemy);
-			//敵の衝突時コールバックを呼び出す
+			// 敵の衝突時コールバックを呼び出す
 			enemy->OnCollision(player_);
 		}
+	}
+}
 
+bool GameScene::IsCollision(AABB aabb1, AABB aabb2) {
+
+	if ((aabb1.min.x <= aabb2.max.x && aabb1.max.x >= aabb2.min.x) && (aabb1.min.y <= aabb2.max.y && aabb1.max.y >= aabb2.min.y) && (aabb1.min.z <= aabb2.max.z && aabb1.max.z >= aabb2.min.z)) {
+
+		return true;
+	}
+
+	return false;
+}
+
+void GameScene::ChangePhase() {
+
+	switch (phase_) {
+	case Phase::kPlay:
+
+		if (player_->ISDead() == true) {
+			//死亡演出へ切り替え
+			phase_ = Phase::kDeath;
+			//自キャラの座標を取得
+			const Vector3& deathParticlesPostion = player_->GetWorldPosition();
+
+			deathParticles_ = new DeatheParticle();
+
+			deathParticles_->Initialize(particleModel_, &viewProjection_, deathParticlesPostion);
+		}
+
+		break;
+	case Phase::kDeath:
+
+		if (deathParticles_ && deathParticles_->isFinished()) {
+		
+			finished_ = true;
+
+		}
+
+		break;
+	default:
+		break;
 	}
 
 }
 
-bool GameScene::IsCollision(AABB aabb1, AABB aabb2) { 
-	
-	if ((aabb1.min.x <= aabb2.max.x && aabb1.max.x >= aabb2.min.x) &&
-		(aabb1.min.y <= aabb2.max.y && aabb1.max.y >= aabb2.min.y) && 
-		(aabb1.min.z <= aabb2.max.z && aabb1.max.z >= aabb2.min.z)) {
-
-		return true;
-
-	}
-
-	return false; }
-
 #pragma endregion
-
-

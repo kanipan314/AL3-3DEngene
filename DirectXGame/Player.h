@@ -80,6 +80,9 @@ class Player {
 		//衝突応答
 	    void OnCollision(const Enemy* enemy);
 
+		//デスフラグgetter
+	    bool ISDead() const { return isDead_;  }
+
 	private:
 		///ワールド変換
 	    WorldTransform worldTransform_;
@@ -125,7 +128,8 @@ class Player {
 		static inline const float kBlank = 0.8f;
 	    static inline const float kAttenuationLanding = 0.8f;
 
-		
+		//デスフラグ
+	    bool isDead_ = false;
 
 };
 

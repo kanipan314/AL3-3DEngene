@@ -58,6 +58,10 @@ public: // メンバ関数
 	//交差判定
 	bool IsCollision(AABB aabb1, AABB aabb2);
 
+	void ChangePhase();
+
+	bool IsFinished() const { return finished_; }
+
 	//デバッグカメラ
 	DebugCamera* debugCamera_ = nullptr;
 
@@ -71,6 +75,9 @@ private: // メンバ変数
 	Model* Blockmodel_ = nullptr;
 	Model* particleModel_ = nullptr;
 	Model* SkydomeModel_ = nullptr;
+	
+	//終了フラグ
+	bool finished_ = false;
 
 	// でバックカメラ有効
 	bool isDebugCameraActive_ = false;
@@ -106,6 +113,16 @@ private: // メンバ変数
 	MapChipField* mapChipField_ = nullptr;
 
 	void GenerateBlocks();
+
+	// ゲームのフェーズ
+	enum class Phase {
+		kPlay,  // ゲームプレイ
+		kDeath, // デス演出
+	};
+
+	// 現在のフェーズ
+	Phase phase_;
+
 
 	/// <summary>
 	/// ゲームシーン用
