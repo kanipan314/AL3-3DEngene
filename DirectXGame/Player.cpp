@@ -40,7 +40,7 @@ Vector3 Player::CornerPosition(const Vector3& center, Corner corner) {
 	return answer;
 }
 
-void Player::TopCollision(CollisionMapInfo info) {
+void Player::TopCollision(CollisionMapInfo& info) {
 	// 上昇あり？
 	if (info.velocity.y <= 0) {
 		return;
@@ -69,41 +69,28 @@ void Player::TopCollision(CollisionMapInfo info) {
 		hit = true;
 	}
 
+	// 右上点の判定
+
+	indexSet = mapChipField_->GetMapChipIndexSetPosition(positionsNew[kRightTom]);
+	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
+	if (mapChipType == MapChipType::kBlock) {
+		hit = true;
+	}
+
 	if (hit) {
 
 		// めり込みを排除する
-		indexSet = mapChipField_->GetMapChipIndexSetPosition(positionsNew[kLeftTop]);
+		indexSet = mapChipField_->GetMapChipIndexSetPosition(positionsNew[kRightTom]);
 		// めり込み先のブロック範囲
 		BlockRect rect = mapChipField_->GetRectByIndex(indexSet.xIndex, indexSet.yIndex);
-		info.velocity.y = std::max(0.0f, velocity_.y);
+		info.velocity.y = std::max(0.0f, (rect.bottom - worldTransform_.translation_.y) - (0.5f + kHeight / 2.0f));
 		// 天井に当たった子を記録する
 		info.TopFlag = true;
 	}
 
-	// 右上点の判定
-	if (!hit) {
-
-		indexSet = mapChipField_->GetMapChipIndexSetPosition(positionsNew[kRightTom]);
-		mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
-		if (mapChipType == MapChipType::kBlock) {
-			hit = true;
-		}
-
-		if (hit) {
-
-			// めり込みを排除する
-			indexSet = mapChipField_->GetMapChipIndexSetPosition(positionsNew[kRightTom]);
-			// めり込み先のブロック範囲
-			BlockRect rect = mapChipField_->GetRectByIndex(indexSet.xIndex, indexSet.yIndex);
-			info.velocity.y = std::max(0.0f, velocity_.y);
-			// 天井に当たった子を記録する
-			info.TopFlag = true;
-		}
-	}
 	Move(info);
-
 }
-void Player::BottomCollision(CollisionMapInfo info) {
+void Player::BottomCollision(CollisionMapInfo& info) {
 	info.BottomFlag = false;
 	// 移動後の4つの角の座標
 	std::array<Vector3, kNumCorner> positionsNew;
@@ -114,7 +101,7 @@ void Player::BottomCollision(CollisionMapInfo info) {
 	}
 	info.BottomFlag = false;
 }
-void Player::RightCollision(CollisionMapInfo info) {
+void Player::RightCollision(CollisionMapInfo& info) {
 	info.BottomFlag = false;
 	// 移動後の4つの角の座標
 	std::array<Vector3, kNumCorner> positionsNew;
@@ -129,21 +116,18 @@ void Player::Move(const CollisionMapInfo& info) {
 
 	CeilingMove(info);
 
-	//移動
+	// 移動
 	worldTransform_.translation_ += info.velocity;
-
 }
 void Player::CeilingMove(const CollisionMapInfo& info) {
 
-	//天井に当たった？
+	// 天井に当たった？
 	if (info.TopFlag) {
-	
+
 		velocity_.y = 0;
-
 	}
-
 }
-void Player::LeftCollision(CollisionMapInfo info) {
+void Player::LeftCollision(CollisionMapInfo& info) {
 	info.BottomFlag = false;
 	// 移動後の4つの角の座標
 	std::array<Vector3, kNumCorner> positionsNew;
@@ -235,17 +219,6 @@ void Player::Update() {
 					turnFirstRotationY_ = std::numbers::pi_v<float> / 2.0f;
 					turnTimer_ = 1.0f;
 				}
-				if (turnTimer_ > 0.0f) {
-
-					turnTimer_ -= 0.1f;
-
-					float destinationRotationYTable[2] = {std::numbers::pi_v<float> / 2.0f, std::numbers::pi_v<float> * 3.0f / 2.0f};
-
-					// 状態に応じた角度を取得する
-					float destinationRotationY = destinationRotationYTable[static_cast<uint32_t>(lrDirection_)];
-					// 自キャラの角度を設定
-					worldTransform_.rotation_.y = Lerp(turnFirstRotationY_, destinationRotationY, turnTimer_);
-				}
 			}
 			// 加速/減速
 			velocity_.x += acceleration.x;
@@ -293,6 +266,17 @@ void Player::Update() {
 			// 接地状態に移行
 			onGround_ = true;
 		}
+	}
+
+	if (turnTimer_ > 0.0f) {
+
+		float destinationRotationYTable[2] = {std::numbers::pi_v<float> / 2.0f, std::numbers::pi_v<float> * 3.0f / 2.0f};
+
+		// 状態に応じた角度を取得する
+		float destinationRotationY = destinationRotationYTable[static_cast<uint32_t>(lrDirection_)];
+		// 自キャラの角度を設定
+		worldTransform_.rotation_.y = Lerp(turnFirstRotationY_, destinationRotationY, turnTimer_);
+		turnTimer_ -= 0.1f;
 	}
 
 	// 移動
