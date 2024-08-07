@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -108,14 +108,18 @@
   <ItemGroup>
     <ClCompile Include="2d\ImGuiManager.cpp" />
     <ClCompile Include="3d\WorldTransform.cpp" />
+    <ClCompile Include="AABB.cpp" />
     <ClCompile Include="base\DirectXCommon.cpp" />
     <ClCompile Include="base\WinApp.cpp" />
     <ClCompile Include="CaneraController.cpp" />
+    <ClCompile Include="DeatheParticle.cpp" />
+    <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MapChipField.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="scene\GameScene.cpp" />
     <ClCompile Include="skydome.cpp" />
+    <ClCompile Include="Title.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="2d\ImGuiManager.h" />
@@ -136,12 +140,15 @@
     <ClInclude Include="3d\TerrainCommon.h" />
     <ClInclude Include="3d\ViewProjection.h" />
     <ClInclude Include="3d\WorldTransform.h" />
+    <ClInclude Include="AABB.h" />
     <ClInclude Include="audio\Audio.h" />
     <ClInclude Include="base\DirectXCommon.h" />
     <ClInclude Include="base\StringUtility.h" />
     <ClInclude Include="base\TextureManager.h" />
     <ClInclude Include="base\WinApp.h" />
     <ClInclude Include="CaneraController.h" />
+    <ClInclude Include="DeatheParticle.h" />
+    <ClInclude Include="Enemy.h" />
     <ClInclude Include="input\Input.h" />
     <ClInclude Include="MapChipField.h" />
     <ClInclude Include="math\Matrix4x4.h" />
@@ -151,6 +158,7 @@
     <ClInclude Include="Player.h" />
     <ClInclude Include="scene\GameScene.h" />
     <ClInclude Include="skydome.h" />
+    <ClInclude Include="Title.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\shaders\TerrainPS.hlsl">

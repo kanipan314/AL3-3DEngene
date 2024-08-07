@@ -318,8 +318,47 @@ void Player::ChangeGround(const CollisionMapInfo& info) {
 void Player::WallMove(const CollisionMapInfo& info) {
 
 	if (info.WallFlag) {
+}
+Vector3 Player::GetWorldPosition() { 
+	
+	//ワールド座標を入れる変数
+	Vector3 worldPos;
 
-		velocity_.x *= (1.0f - kAttenuationWall);
+	//ワールド行列の平行移動成分を取得
+	worldPos.x = worldTransform_.translation_.x;
+	worldPos.y = worldTransform_.translation_.y;
+	worldPos.z = worldTransform_.translation_.z;
+
+	return worldPos;
+}
+AABB Player::GetAABB() {
+
+	Vector3 worldPos = GetWorldPosition();
+
+	AABB aabb;
+
+	aabb.min = {worldPos.x - 4.0f / 2.0f, worldPos.y - 4.0f / 2.0f, worldPos.z - 4.0f / 2.0f};
+	aabb.max = {worldPos.x + 4.0f / 2.0f, worldPos.y + 4.0f / 2.0f, worldPos.z + 4.0f / 2.0f};
+
+	return aabb;
+}
+void Player::OnCollision(const Enemy* enemy) {
+
+	(void)enemy;
+	//ジャンプ開始
+	/*velocity_ += Vector3(0, kJumpAcceleration, 0);*/
+
+	isDead_ = true;
+
+}
+void Player::LeftCollision(CollisionMapInfo info) {
+	info.BottomFlag = false;
+	// 移動後の4つの角の座標
+	std::array<Vector3, kNumCorner> positionsNew;
+
+	for (uint32_t i = 0; i < positionsNew.size(); i++) {
+		positionsNew[i] = Player::CornerPosition(
+		    {worldTransform_.translation_.x + info.velocity.x, worldTransform_.translation_.y + info.velocity.y, worldTransform_.translation_.z + info.velocity.x}, static_cast<Corner>(i));
 	}
 }
 

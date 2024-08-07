@@ -6,6 +6,7 @@
 #include "Input.h"
 #include "Model.h"
 #include "Player.h"
+#include "Enemy.h"
 #include "Sprite.h"
 #include "ViewProjection.h"
 #include "WorldTransform.h"
@@ -15,6 +16,7 @@
 #include "MapChipField.h"
 #include "CaneraController.h"
 #include "ImGuiManager.h"
+#include "DeatheParticle.h"
 
 /// <summary>
 /// ゲームシーン
@@ -22,6 +24,7 @@
 class GameScene {
 
 	std::vector<std::vector<WorldTransform*>> worldTransformBlocks_;
+	std::list<Enemy*> enemies_;
 
 public: // メンバ関数
 	/// <summary>
@@ -49,7 +52,15 @@ public: // メンバ関数
 	/// </summary>
 	void Draw();
 
-    
+    //全ての当たり判定を行う
+	void CheckAllCollisions();
+
+	//交差判定
+	bool IsCollision(AABB aabb1, AABB aabb2);
+
+	void ChangePhase();
+
+	bool IsFinished() const { return finished_; }
 
 	//デバッグカメラ
 	DebugCamera* debugCamera_ = nullptr;
@@ -60,8 +71,13 @@ private: // メンバ変数
 	Input* input_ = nullptr;
 	Audio* audio_ = nullptr;
 	Model* model_ = nullptr;
+	Model* enemyModel_ = nullptr;
 	Model* Blockmodel_ = nullptr;
+	Model* particleModel_ = nullptr;
 	Model* SkydomeModel_ = nullptr;
+	
+	//終了フラグ
+	bool finished_ = false;
 
 	// でバックカメラ有効
 	bool isDebugCameraActive_ = false;
@@ -78,6 +94,12 @@ private: // メンバ変数
 	/// </summary>
 
 	Player* player_ = nullptr;
+
+	//敵キャラ
+	Enemy* enemy_ = nullptr;
+
+	//パーティクル
+	DeatheParticle* deathParticles_ = nullptr;
 	
 	//天球
 	Skydome* skydome_ = nullptr;
@@ -91,6 +113,16 @@ private: // メンバ変数
 	MapChipField* mapChipField_ = nullptr;
 
 	void GenerateBlocks();
+
+	// ゲームのフェーズ
+	enum class Phase {
+		kPlay,  // ゲームプレイ
+		kDeath, // デス演出
+	};
+
+	// 現在のフェーズ
+	Phase phase_;
+
 
 	/// <summary>
 	/// ゲームシーン用

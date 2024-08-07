@@ -3,6 +3,7 @@
 #include "Sprite.h"
 #include "ViewProjection.h"
 #include "WorldTransform.h"
+#include "AABB.h"
 
 /// <summary>
 /// 自キャラ
@@ -32,6 +33,8 @@ struct CollisionMapInfo {
 };
 
 class MapChipField;
+
+class Enemy;
 
 class Player {
 
@@ -68,6 +71,18 @@ class Player {
 
 		void ChangeGround(const CollisionMapInfo& info);
 	    void WallMove(const CollisionMapInfo& info);
+
+		//ワールド座標を取得
+	    Vector3 GetWorldPosition();
+
+		//AABBを取得
+	    AABB GetAABB();
+
+		//衝突応答
+	    void OnCollision(const Enemy* enemy);
+
+		//デスフラグgetter
+	    bool ISDead() const { return isDead_;  }
 
 	private:
 		///ワールド変換
@@ -117,6 +132,9 @@ class Player {
 	    static inline const float kAttenuationLanding = 0.8f;
 		//地面との当たり判定用
 	    static inline const float kCheckLanding = -0.5f;
+
+		//デスフラグ
+	    bool isDead_ = false;
 
 };
 
