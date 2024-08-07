@@ -1,5 +1,6 @@
 #pragma once
 
+#include "iostream"
 #include "Audio.h"
 #include "DirectXCommon.h"
 #include "Input.h"
@@ -13,6 +14,7 @@
 #include "skydome.h"
 #include "MapChipField.h"
 #include "CaneraController.h"
+#include "ImGuiManager.h"
 
 /// <summary>
 /// ゲームシーン

@@ -1,10 +1,11 @@
 #include "GameScene.h"
 #include "MapChipField.h"
+#include <cassert>
 #include <map>
 #include <fstream>
 #include <sstream>
 
-#include <cassert>
+
 
 //namespace {
     std::map<std::string, MapChipType> mapChipTable = {
@@ -88,3 +89,27 @@ Vector3 MapChipField::GetMapChipPositionByIndex(uint32_t xIndex, uint32_t yIndex
 uint32_t MapChipField::GetNumBlockVirtical() { return 20; }
 
 uint32_t MapChipField::GetNumBlockHorizontal() { return 100; }
+
+IndexSet MapChipField::GetMapChipIndexSetPosition(const Vector3& position) {
+    
+    IndexSet indexSet = {};
+	indexSet.xIndex = (uint32_t)((position.x + kBlockWidth / 2) / kBlockWidth);
+	indexSet.yIndex = (uint32_t)(kNumBlockVirtical - 1 - (position.y + kBlockHeight / 2) / kBlockHeight + 1);
+
+    return indexSet;
+}
+
+BlockRect MapChipField::GetRectByIndex(uint32_t xindex, uint32_t yindex) { 
+    
+    //指定ブロックの中心座標を取得
+	Vector3 center = GetMapChipPositionByIndex(xindex, yindex);
+
+    BlockRect rect;
+	rect.left = center.x - kBlockWidth / 2.0f;
+	rect.right = center.x + kBlockWidth / 2.0f;
+	rect.top = center.y + kBlockHeight / 2.0f;
+	rect.bottom = center.y - kBlockHeight / 2.0f;
+    
+    return rect; 
+
+}

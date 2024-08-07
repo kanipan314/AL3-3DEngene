@@ -50,11 +50,24 @@ class Player {
 
 		const Vector3& GetVelocity() const { return velocity_; };
 
-		void SetMapChipField(MapChipField* mapChipField) { mapChipField_ = mapChipField; };
+		void SetMapChipField(MapChipField* mapChipField) { 
+			mapChipField_ = mapChipField; 
+		};
 
 		void CollisionFlag(CollisionMapInfo& info);
 
-		Vector3 CornerPosition(const Vector3& center, Corner corner);
+		static Vector3 CornerPosition(const Vector3& center, Corner corner);
+		
+		void TopCollision(CollisionMapInfo& info);
+	    void BottomCollision(CollisionMapInfo& info);
+	    void LeftCollision(CollisionMapInfo& info);
+	    void RightCollision(CollisionMapInfo& info);
+
+		void Move(const CollisionMapInfo& info);
+	    void CeilingMove(const CollisionMapInfo& info);
+
+		void ChangeGround(const CollisionMapInfo& info);
+	    void WallMove(const CollisionMapInfo& info);
 
 	private:
 		///ワールド変換
@@ -70,6 +83,8 @@ class Player {
 	    static inline const float kAcceleration = 0.10f;
 		//減速率
 	    static inline const float kAttenuation = 0.05f;
+	    // 減速率
+	    static inline const float kAttenuationWall = 1.0f;
 		//最大速度
 	    static inline const float kLimitRunSpeed = 0.25f;
 		//旋回時間＜秒＞
@@ -81,12 +96,12 @@ class Player {
 
 		//接地状態フラグ
 	    bool onGround_ = true;
-		//重力加速度
-	    static inline const float kGravityAcceleration = 0.98f;
-		//最大落下速度
-	    static inline const float kLimitFallSpeed = 0.25f;
-		//ジャンプ初速
-	    static inline const float kJumpAcceleration = 2.5f;
+	    // 重力加速度
+	    static inline const float kGravityAcceleration = 0.2f;
+	    // 最大落下速度
+	    static inline const float kLimitFallSpeed = 0.5f;
+	    // ジャンプ初速
+	    static inline const float kJumpAcceleration = 1.5f;
 
 		LRDirection lrDirection_ = LRDirection::kRigth;
 
@@ -96,6 +111,12 @@ class Player {
 		//キャラの当たり判定
 	    static inline const float kWidth = 0.8f;
 	    static inline const float kHeight = 0.8f;
+
+
+		static inline const float kBlank = 0.8f;
+	    static inline const float kAttenuationLanding = 0.8f;
+		//地面との当たり判定用
+	    static inline const float kCheckLanding = -0.5f;
 
 };
 

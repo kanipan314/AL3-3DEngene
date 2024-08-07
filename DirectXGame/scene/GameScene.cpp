@@ -48,6 +48,12 @@ void GameScene::Initialize() {
 	viewProjection_.Initialize();
 	// デバッグカメラの生成
 	debugCamera_ = new DebugCamera(WinApp::kWindowWidth, WinApp::kWindowHeight);
+
+	// マップチップ
+	mapChipField_ = new MapChipField;
+	mapChipField_->LoadMapChipCSV("./Resources/map.csv");
+	GenerateBlocks();
+
 	// 自キャラの生成
 	player_ = new Player();
 	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(1, 18);
@@ -70,11 +76,7 @@ void GameScene::Initialize() {
 
 	//移動範囲の指定
 	cameraController_->SetMovableArea(cameraArea);
-	
-	// マップチップ
-	mapChipField_ = new MapChipField;
-	mapChipField_->LoadMapChipCSV("./Resources/map.csv");
-	GenerateBlocks();
+
 }
 
 void GameScene::GenerateBlocks() {
