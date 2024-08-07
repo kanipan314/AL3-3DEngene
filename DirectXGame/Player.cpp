@@ -69,37 +69,25 @@ void Player::TopCollision(CollisionMapInfo& info) {
 		hit = true;
 	}
 
+	// 右上点の判定
+
+	indexSet = mapChipField_->GetMapChipIndexSetPosition(positionsNew[kRightTom]);
+	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
+	if (mapChipType == MapChipType::kBlock) {
+		hit = true;
+	}
+
 	if (hit) {
 
 		// めり込みを排除する
-		indexSet = mapChipField_->GetMapChipIndexSetPosition(positionsNew[kLeftTop]);
+		indexSet = mapChipField_->GetMapChipIndexSetPosition(positionsNew[kRightTom]);
 		// めり込み先のブロック範囲
 		BlockRect rect = mapChipField_->GetRectByIndex(indexSet.xIndex, indexSet.yIndex);
-		info.velocity.y = std::max(0.0f, velocity_.y);
+		info.velocity.y = std::max(0.0f, (rect.bottom - worldTransform_.translation_.y) - (kCheckLanding + kHeight / 2.0f));
 		// 天井に当たった子を記録する
 		info.TopFlag = true;
 	}
 
-	// 右上点の判定
-	if (!hit) {
-
-		indexSet = mapChipField_->GetMapChipIndexSetPosition(positionsNew[kRightTom]);
-		mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
-		if (mapChipType == MapChipType::kBlock) {
-			hit = true;
-		}
-
-		if (hit) {
-
-			// めり込みを排除する
-			indexSet = mapChipField_->GetMapChipIndexSetPosition(positionsNew[kRightTom]);
-			// めり込み先のブロック範囲
-			BlockRect rect = mapChipField_->GetRectByIndex(indexSet.xIndex, indexSet.yIndex);
-			info.velocity.y = std::max(0.0f, velocity_.y);
-			// 天井に当たった子を記録する
-			info.TopFlag = true;
-		}
-	}
 	Move(info);
 }
 void Player::BottomCollision(CollisionMapInfo& info) {
@@ -146,18 +134,19 @@ void Player::BottomCollision(CollisionMapInfo& info) {
 		// めり込み先のブロック範囲
 		BlockRect rect = mapChipField_->GetRectByIndex(indexSet.xIndex, indexSet.yIndex);
 
-		info.velocity.y = std::max(0.0f, (rect.top) - ( worldTransform_.translation_.y - kHeight / 2.0f));
+		info.velocity.y = std::max(0.0f, (rect.bottom - worldTransform_.translation_.y) - (kCheckLanding + kHeight / 2.0f)); // ｙ移動量5-5-1.8/2//ムーブがゼロ//
+
 		// 地面に当たった子を記録する
 		info.BottomFlag = true;
 	}
 }
 void Player::RightCollision(CollisionMapInfo& info) {
 
-	//右移動あり
+	// 右移動あり
 	if (info.velocity.x <= 0) {
 		return;
 	}
-	
+
 	// 移動後の4つの角の座標
 	std::array<Vector3, kNumCorner> positionsNew;
 
@@ -195,8 +184,7 @@ void Player::RightCollision(CollisionMapInfo& info) {
 		// めり込み先のブロック範囲
 		BlockRect rect = mapChipField_->GetRectByIndex(indexSet.xIndex, indexSet.yIndex);
 
-		info.velocity.x = std::min(0.0f, (rect.right) - (worldTransform_.translation_.x - kWidth / 2.0f));
-		// 地面に当たった子を記録する
+		info.velocity.x = std::max(0.0f, (rect.right - worldTransform_.translation_.x) + (kCheckLanding + kWidth / 2.0f));
 		info.WallFlag = true;
 	}
 
@@ -247,11 +235,10 @@ void Player::LeftCollision(CollisionMapInfo& info) {
 		// めり込み先のブロック範囲
 		BlockRect rect = mapChipField_->GetRectByIndex(indexSet.xIndex, indexSet.yIndex);
 
-		info.velocity.x = std::min(0.0f, (rect.left) - (worldTransform_.translation_.x - kWidth / 2.0f));
+		info.velocity.x = std::max(0.0f, (rect.left - worldTransform_.translation_.x) + (kCheckLanding + kWidth / 2.0f));
 		// 地面に当たった子を記録する
-		info.BottomFlag = true;
+		info.WallFlag = true;
 	}
-	
 	WallMove(info);
 }
 
@@ -271,8 +258,6 @@ void Player::CeilingMove(const CollisionMapInfo& info) {
 	}
 }
 void Player::ChangeGround(const CollisionMapInfo& info) {
-
-
 
 	// 自キャラが接地状態
 	if (onGround_) {
@@ -317,7 +302,6 @@ void Player::ChangeGround(const CollisionMapInfo& info) {
 		// 落下速度
 		velocity_.y = std::max(velocity_.y, -kLimitFallSpeed);
 
-
 		// 着地フラグ
 		if (info.BottomFlag) {
 
@@ -328,19 +312,15 @@ void Player::ChangeGround(const CollisionMapInfo& info) {
 			// Y速度をゼロにする
 			velocity_.y = 0.0f;
 		}
-	
-		
 	}
 }
 
 void Player::WallMove(const CollisionMapInfo& info) {
 
 	if (info.WallFlag) {
-	
+
 		velocity_.x *= (1.0f - kAttenuationWall);
-
 	}
-
 }
 
 void Player::Initialize(Model* model, ViewProjection* viewProjection, const Vector3& position) {
@@ -436,7 +416,6 @@ void Player::Update() {
 			onGround_ = false;
 		}
 		// 空中
-		
 	}
 
 	if (turnTimer_ > 0.0f) {
@@ -451,8 +430,8 @@ void Player::Update() {
 	}
 
 	//// 衝突情報を初期化
-	//CollisionMapInfo collisionMapInfo;
-	// 移動量に速度を値をコピー
+	// CollisionMapInfo collisionMapInfo;
+	//  移動量に速度を値をコピー
 	collisionMapInfo.velocity = velocity_;
 	// マップ衝突チェック
 	CollisionFlag(collisionMapInfo);

@@ -99,7 +99,7 @@ class Player {
 	    // 重力加速度
 	    static inline const float kGravityAcceleration = 0.2f;
 	    // 最大落下速度
-	    static inline const float kLimitFallSpeed = 0.8f;
+	    static inline const float kLimitFallSpeed = 0.5f;
 	    // ジャンプ初速
 	    static inline const float kJumpAcceleration = 1.5f;
 
@@ -116,7 +116,7 @@ class Player {
 		static inline const float kBlank = 0.8f;
 	    static inline const float kAttenuationLanding = 0.8f;
 		//地面との当たり判定用
-	    static inline const float kCheckLanding = -1.3f;
+	    static inline const float kCheckLanding = -0.5f;
 
 };
 
