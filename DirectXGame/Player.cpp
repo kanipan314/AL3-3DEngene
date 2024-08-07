@@ -318,6 +318,9 @@ void Player::ChangeGround(const CollisionMapInfo& info) {
 void Player::WallMove(const CollisionMapInfo& info) {
 
 	if (info.WallFlag) {
+
+		velocity_.x *= (1.0f - kAttenuationWall);
+	}
 }
 Vector3 Player::GetWorldPosition() { 
 	
@@ -350,16 +353,6 @@ void Player::OnCollision(const Enemy* enemy) {
 
 	isDead_ = true;
 
-}
-void Player::LeftCollision(CollisionMapInfo info) {
-	info.BottomFlag = false;
-	// 移動後の4つの角の座標
-	std::array<Vector3, kNumCorner> positionsNew;
-
-	for (uint32_t i = 0; i < positionsNew.size(); i++) {
-		positionsNew[i] = Player::CornerPosition(
-		    {worldTransform_.translation_.x + info.velocity.x, worldTransform_.translation_.y + info.velocity.y, worldTransform_.translation_.z + info.velocity.x}, static_cast<Corner>(i));
-	}
 }
 
 void Player::Initialize(Model* model, ViewProjection* viewProjection, const Vector3& position) {
