@@ -1,6 +1,11 @@
+#define NOMINMAX
 #include "Enemy.h"
+#include "ImGuiManager.h"
+#include "Input.h"
+#include "MapChipField.h"
+#include "cassert"
 #include "numbers"
-#include <cmath>
+#include <algorithm>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846f
@@ -26,6 +31,9 @@ void Enemy::Initialize(Model* model, ViewProjection* viewProjection ,const Vecto
 }
 
 void Enemy::Update() {
+
+	randSpeed_.x = (float)(rand() % 5 - 6);
+	velocity_.x = randSpeed_.x;
 
 	// 移動
 	position_ += velocity_;
@@ -68,9 +76,9 @@ Vector3 Enemy::GetWorldPosition() {
 	worldPos.y = worldTransform_.translation_.y;
 	worldPos.z = worldTransform_.translation_.z;
 
-	return worldPos;
+	return worldPos;	}
 
-	}
+
 
 AABB Enemy::GetAABB() { 
 	

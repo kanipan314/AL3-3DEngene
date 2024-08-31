@@ -4,6 +4,7 @@
 #include "ViewProjection.h"
 #include "WorldTransform.h"
 #include "AABB.h"
+#include "CaneraController.h"
 
 /// <summary>
 /// 自キャラ
@@ -15,10 +16,10 @@ enum class LRDirection {
 };
 
 enum Corner {
-	kRightBottom,   //右下
-	kLeftBottom,	//左下
-	kRightTom,		//右上
-	kLeftTop,		//左上
+	kRightBottom,      // 右下
+	kLeftBottom,       // 左下
+	kRightTom,         // 右上
+	kLeftTop,          // 左上
 
 	kNumCorner		//要素数
 };
@@ -56,6 +57,8 @@ class Player {
 		void SetMapChipField(MapChipField* mapChipField) { 
 			mapChipField_ = mapChipField; 
 		};
+
+		void SetCamela(CaneraController* tagetposition) { tagetposition_ = tagetposition; };
 
 		void CollisionFlag(CollisionMapInfo& info);
 
@@ -123,6 +126,8 @@ class Player {
 		//マップチップによるフィールド
 	    MapChipField* mapChipField_ = nullptr;
 
+		CaneraController* tagetposition_ = nullptr;
+
 		//キャラの当たり判定
 	    static inline const float kWidth = 0.8f;
 	    static inline const float kHeight = 0.8f;
@@ -135,6 +140,9 @@ class Player {
 
 		//デスフラグ
 	    bool isDead_ = false;
+
+		//ゴールフラグ
+	    bool isGoal = false;
 
 };
 

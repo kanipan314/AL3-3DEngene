@@ -17,6 +17,10 @@
 #include "CaneraController.h"
 #include "ImGuiManager.h"
 #include "DeatheParticle.h"
+#include "random"
+#include <string>
+#include <fstream>
+#include <sstream>
 
 /// <summary>
 /// ゲームシーン
@@ -24,6 +28,7 @@
 class GameScene {
 
 	std::vector<std::vector<WorldTransform*>> worldTransformBlocks_;
+	std::vector<std::vector<WorldTransform*>> worldTransformJumps_;
 	std::list<Enemy*> enemies_;
 
 public: // メンバ関数
@@ -62,6 +67,10 @@ public: // メンバ関数
 
 	bool IsFinished() const { return finished_; }
 
+	void MaxPosition(Vector3 positon);
+
+	float LeadPosition();
+
 	//デバッグカメラ
 	DebugCamera* debugCamera_ = nullptr;
 
@@ -75,9 +84,13 @@ private: // メンバ変数
 	Model* Blockmodel_ = nullptr;
 	Model* particleModel_ = nullptr;
 	Model* SkydomeModel_ = nullptr;
+	Model* ScopeModel_ = nullptr;
+	Model* goalModel_ = nullptr;
 	
 	//終了フラグ
 	bool finished_ = false;
+	//ゴールフラグ
+	bool goal_ = false;
 
 	// でバックカメラ有効
 	bool isDebugCameraActive_ = false;
@@ -122,6 +135,13 @@ private: // メンバ変数
 
 	// 現在のフェーズ
 	Phase phase_;
+
+	//敵の出現タイマー
+	float EnemyTimer_ = 0.0f;
+
+	//最高到達点
+	Vector3 maxPosition;
+	Vector3 deathPosition;
 
 
 	/// <summary>

@@ -450,6 +450,7 @@ void Player::Update() {
 		// 空中
 	}
 
+
 	if (turnTimer_ > 0.0f) {
 
 		float destinationRotationYTable[2] = {std::numbers::pi_v<float> / 2.0f, std::numbers::pi_v<float> * 3.0f / 2.0f};
@@ -480,8 +481,23 @@ void Player::Update() {
 
 	worldTransform_.matWorld_.m;
 	worldTransform_.TransferMatrix();
+
+	if (worldTransform_.translation_.y <= -25) {
+	
+		isDead_ = true;
+
+	}
+	if (worldTransform_.translation_.x >= 199) {
+	
+		isGoal = true;
+
+	}
 }
 
-void Player::Draw() { model_->Draw(worldTransform_, *viewProjection_, textureHandle_); }
+void Player::Draw() { 
+	
+	model_->Draw(worldTransform_, *viewProjection_, textureHandle_);
+
+}
 
 const WorldTransform& Player::GetWorldTransform() { return worldTransform_; }

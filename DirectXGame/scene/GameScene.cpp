@@ -28,6 +28,13 @@ GameScene::~GameScene() {
 	}
 	worldTransformBlocks_.clear();
 
+	for (std::vector<WorldTransform*>& worldTransformJumpLine : worldTransformJumps_) {
+		for (WorldTransform* worldTransformJumpBlock : worldTransformJumpLine) {
+			delete worldTransformJumpBlock;
+		}
+	}
+	worldTransformJumps_.clear();
+
 	// パーティクルの開放
 	delete deathParticles_;
 
@@ -55,6 +62,8 @@ void GameScene::Initialize() {
 	model_ = Model::CreateFromOBJ("Player", true);
 	enemyModel_ = Model::CreateFromOBJ("Enemy", true);
 	particleModel_ = Model::CreateFromOBJ("Paticle", true);
+	ScopeModel_ = Model::CreateFromOBJ("Scope", true);
+	goalModel_ = Model::CreateFromOBJ("Gaol", true);
 	Blockmodel_ = Model::Create();
 
 	// カメラ系初期化
@@ -77,16 +86,6 @@ void GameScene::Initialize() {
 	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(1, 18);
 	player_->Initialize(model_, &viewProjection_, playerPosition);
 	player_->SetMapChipField(mapChipField_);
-
-	for (float i = 0; i < 5; i++) {
-
-		Enemy* newEnemy = new Enemy();
-		Vector3 enemyPosition = {i * 5 + 45, 3.0f, 0.0f};
-
-		newEnemy->Initialize(enemyModel_, &viewProjection_, enemyPosition);
-
-		enemies_.push_back(newEnemy);
-	}
 
 	// 仮
 	deathParticles_ = new DeatheParticle;
@@ -134,6 +133,12 @@ void GameScene::GenerateBlocks() {
 				worldTransformBlocks_[i][j] = worldTransform;
 				worldTransformBlocks_[i][j]->translation_ = mapChipField_->GetMapChipPositionByIndex(j, i);
 			}
+			if (mapChipField_->GetMapChipTypeByIndex(j, i) == MapChipType::kScope) {
+				WorldTransform* JumpTransform = new WorldTransform();
+				JumpTransform->Initialize();
+				worldTransformJumps_[i][j] = JumpTransform;
+				worldTransformJumps_[i][j]->translation_ = mapChipField_->GetMapChipPositionByIndex(j, i);
+			}
 		}
 	}
 }
@@ -145,6 +150,19 @@ void GameScene::Update() {
 	switch (phase_) {
 	case Phase::kPlay:
 
+		if (EnemyTimer_ > 15.0f) {
+
+			EnemyTimer_ = 0.0f;
+			float randPosition = (float)(rand() % 20 + 1);
+
+			Enemy* newEnemy = new Enemy();
+			Vector3 enemyPosition = {400, randPosition, 0.0f};
+
+			newEnemy->Initialize(enemyModel_, &viewProjection_, enemyPosition);
+
+			enemies_.push_back(newEnemy);
+		}
+
 		// 自キャラの更新
 		player_->Update();
 
@@ -154,6 +172,15 @@ void GameScene::Update() {
 					continue;
 
 				worldTransformBlock->UpdateMatrix();
+			}
+		}
+
+		for (std::vector<WorldTransform*>& worldTransformJumpLine : worldTransformJumps_) {
+			for (WorldTransform* worldTransformJumpBlock : worldTransformJumpLine) {
+				if (!worldTransformJumpBlock)
+					continue;
+
+				worldTransformJumpBlock->UpdateMatrix();
 			}
 		}
 
@@ -169,7 +196,7 @@ void GameScene::Update() {
 		// 当たり判定
 		CheckAllCollisions();
 
-		#ifdef _DEBUG
+#ifdef _DEBUG
 
 		if (input_->TriggerKey(DIK_BACKSPACE)) {
 
@@ -194,6 +221,15 @@ void GameScene::Update() {
 			viewProjection_.UpdateMatrix();
 		}
 
+		EnemyTimer_++;
+
+		if (maxPosition.x < player_->GetWorldPosition().x) {
+
+			maxPosition.x = LeadPosition();
+		}
+
+		
+
 		break;
 
 	case Phase::kDeath:
@@ -206,12 +242,14 @@ void GameScene::Update() {
 			enmeyList->Update();
 		}
 
+		MaxPosition(player_->GetWorldPosition());
+
 		// パーティクル更新
 		if (deathParticles_) {
 			deathParticles_->Update();
 		}
 
-		#ifdef _DEBUG
+#ifdef _DEBUG
 
 		if (input_->TriggerKey(DIK_BACKSPACE)) {
 
@@ -295,7 +333,6 @@ void GameScene::Draw() {
 		for (WorldTransform* worldTransformBlock : worldTransformBlockLine) {
 			if (!worldTransformBlock)
 				continue;
-
 			Blockmodel_->Draw(*worldTransformBlock, viewProjection_);
 		}
 	}
@@ -306,6 +343,10 @@ void GameScene::Draw() {
 		deathParticles_->Draw();
 	}
 
+	if (goal_) {
+
+		goalModel_->Draw(worldTransfrom_, viewProjection_);
+	}
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();
 #pragma endregion
@@ -365,9 +406,9 @@ void GameScene::ChangePhase() {
 	case Phase::kPlay:
 
 		if (player_->ISDead() == true) {
-			//死亡演出へ切り替え
+			// 死亡演出へ切り替え
 			phase_ = Phase::kDeath;
-			//自キャラの座標を取得
+			// 自キャラの座標を取得
 			const Vector3& deathParticlesPostion = player_->GetWorldPosition();
 
 			deathParticles_ = new DeatheParticle();
@@ -379,16 +420,69 @@ void GameScene::ChangePhase() {
 	case Phase::kDeath:
 
 		if (deathParticles_ && deathParticles_->isFinished()) {
-		
-			finished_ = true;
 
+			finished_ = true;
 		}
 
 		break;
 	default:
 		break;
 	}
+}
 
+void GameScene::MaxPosition(Vector3 positon) {
+	std::string output_csv_file_path = "./Resources/HiScore.txt";
+
+	// 書き込むCSVファイルを開く（std::ofstreamのコンストラクタで開く）
+	std::ofstream ofs_csv_file(output_csv_file_path, std::ios::app); // `std::ios::app` でファイル末尾に追記
+
+	// ファイルが正しく開けたか確認
+	if (!ofs_csv_file.is_open()) {
+		std::cerr << "ファイルを開くことができませんでした: " << output_csv_file_path << std::endl;
+		return;
+	}
+
+	// `position` の x, y, z の値をCSV形式で書き込む
+	ofs_csv_file << positon.x << ',' ;
+
+	// ファイルを閉じる
+	ofs_csv_file.close();
+}
+
+float GameScene::LeadPosition() { 
+
+ 	std::string str_buf;
+	
+	std::string input_csv_file_path = "./Resources/HiScore.txt";
+
+	// 読み込むcsvファイルを開く(std::ifstreamのコンストラクタで開く)
+	std::ifstream file(input_csv_file_path);
+
+	// ファイルが正しく開けたか確認
+	if (!file.is_open()) {
+		std::cerr << "ファイルを開くことができませんでした: " << input_csv_file_path << std::endl;
+		return 1;
+	}
+
+	 // 最大値を求めるために初期値を非常に小さな値で設定
+	float maxValue = std::numeric_limits<float>::lowest();
+
+	 // ファイルから1行ずつ読み込む
+	std::string line;
+	while (std::getline(file, line)) {
+		std::istringstream iss(line); // 文字列をストリームとして扱う
+		float x;
+
+		// 1つの浮動小数点数（xの値）を読み取る
+		if (iss >> x) {
+			// 最大値を更新
+			if (x > maxValue)
+				maxValue = x;
+		} else {
+			std::cerr << "データの解析に失敗しました: " << line << std::endl;
+		}
+	}
+	return maxValue;
 }
 
 #pragma endregion

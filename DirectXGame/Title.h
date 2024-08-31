@@ -5,6 +5,7 @@
 #include "DirectXCommon.h"
 #include "Input.h"
 #include "Model.h"
+#include "skydome.h"
 #include "Sprite.h"
 #include "ViewProjection.h"
 #include "WorldTransform.h"
@@ -37,9 +38,13 @@ private:
 	ViewProjection viewProjection_;
 
 	Model* model = nullptr;
+	Model* SkydomeModel_ = nullptr;
 
 	//テクスチャ
 	uint32_t textureHandle_ = 0;
+
+	// 天球
+	Skydome* skydome_ = nullptr;
 
 	//終了フラグ
 	bool finished_ = false;

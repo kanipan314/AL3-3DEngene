@@ -15,6 +15,7 @@ Vector3 Lerp(const Vector3& a, const Vector3& b, float t) {
 
 void CaneraController::Initialize(ViewProjection* viewProjection) {
 	viewProjection_ = viewProjection;
+	cameraTargetPosition = {0, 0, -50.0f};
 }
 
 void CaneraController::Update() {

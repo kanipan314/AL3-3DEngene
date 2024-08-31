@@ -88,7 +88,7 @@ Vector3 MapChipField::GetMapChipPositionByIndex(uint32_t xIndex, uint32_t yIndex
 
 uint32_t MapChipField::GetNumBlockVirtical() { return 20; }
 
-uint32_t MapChipField::GetNumBlockHorizontal() { return 100; }
+uint32_t MapChipField::GetNumBlockHorizontal() { return 1000; }
 
 IndexSet MapChipField::GetMapChipIndexSetPosition(const Vector3& position) {
     

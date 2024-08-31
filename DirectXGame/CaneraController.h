@@ -29,6 +29,8 @@ class CaneraController {
 
 		void SetMovableArea(Rect area) { movableArea_ = area; }
 
+		void SetcameraTargetPosition(Vector3* position) { cameraTargetPosition = *position; }
+
 		void Reset();
 
 	private:
@@ -36,13 +38,13 @@ class CaneraController {
 		//ビュープロジェクション
 	    ViewProjection* viewProjection_ = nullptr;
 	    Player* target_ = nullptr;
-	    Vector3 targeOffset_ = {0, 0, -30.0f};
+	    Vector3 targeOffset_ = {0, 0, -75.0f};
 	    // カメラ移動範囲
 	    Rect movableArea_ = {25, 75, 25, 75};
 		//追従対象の各方向へのカメラ移動範囲
 	    static inline const Rect margin = {-25, 25, -25, 25};
 		//カメラの目標座標
-	    Vector3 cameraTargetPosition = {0, 0, -30.0f};
+	    Vector3 cameraTargetPosition = {};
 		//座標補間割合
 	    static inline const float kInterpolationRate = 0.8f;
 		//速度掛け算
